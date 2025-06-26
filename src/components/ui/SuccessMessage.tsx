@@ -1,8 +1,8 @@
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, memo } from 'react'
 
-const SuccessMessage = forwardRef<HTMLDivElement>((props, ref) => {
+const SuccessMessage = memo(forwardRef<HTMLDivElement>((props, ref) => {
   return (
     <div 
       ref={ref}
@@ -11,7 +11,7 @@ const SuccessMessage = forwardRef<HTMLDivElement>((props, ref) => {
       ✅ Succesvol opgeslagen!
     </div>
   )
-})
+}))
 
 SuccessMessage.displayName = 'SuccessMessage'
 

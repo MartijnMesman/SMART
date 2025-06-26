@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { FormData } from './useFormData'
 
 export function useExport(formData: FormData, currentStep: number) {
@@ -16,8 +16,16 @@ export function useExport(formData: FormData, currentStep: number) {
         URL.revokeObjectURL(url);
     }, []);
 
-    const exportAsText = useCallback(() => {
-        const content = `SMART LEERDOEL - ${formData.algemeneInfo.naam}
+    // Memoize filename generation to prevent recalculation
+    const baseFilename = useMemo(() => {
+        const name = formData.algemeneInfo.naam.replace(/\s+/g, '_') || 'SMART_Leerdoel';
+        const date = new Date().toISOString().split('T')[0];
+        return `${name}_${date}`;
+    }, [formData.algemeneInfo.naam]);
+
+    // Memoize content generation for better performance
+    const textContent = useMemo(() => {
+        return `SMART LEERDOEL - ${formData.algemeneInfo.naam}
 Datum: ${new Date().toLocaleDateString('nl-NL')}
 Opleiding: ${formData.algemeneInfo.opleiding}
 Studiejaar: ${formData.algemeneInfo.studiejaar}
@@ -80,12 +88,10 @@ Eigenschap eigen gemaakt: ${formData.stap9_reflectie.eigenGemaakt}
 Nieuwe uitdaging: ${formData.stap9_reflectie.nieuweUitdaging}
 
 Gegenereerd door SMART Leerdoel Creator - inholland hogeschool`;
+    }, [formData]);
 
-        downloadFile(content, `SMART_Leerdoel_${formData.algemeneInfo.naam.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`, 'text/plain');
-    }, [formData, downloadFile]);
-
-    const exportAsMarkdown = useCallback(() => {
-        const content = `# SMART Leerdoel - ${formData.algemeneInfo.naam}
+    const markdownContent = useMemo(() => {
+        return `# SMART Leerdoel - ${formData.algemeneInfo.naam}
 
 **Datum:** ${new Date().toLocaleDateString('nl-NL')}  
 **Opleiding:** ${formData.algemeneInfo.opleiding}  
@@ -150,9 +156,15 @@ ${formData.stap7_obstakels.map((item, index) =>
 
 ---
 *Gegenereerd door SMART Leerdoel Creator - inholland hogeschool*`;
+    }, [formData]);
 
-        downloadFile(content, `SMART_Leerdoel_${formData.algemeneInfo.naam.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.md`, 'text/markdown');
-    }, [formData, downloadFile]);
+    const exportAsText = useCallback(() => {
+        downloadFile(textContent, `${baseFilename}.txt`, 'text/plain');
+    }, [textContent, baseFilename, downloadFile]);
+
+    const exportAsMarkdown = useCallback(() => {
+        downloadFile(markdownContent, `${baseFilename}.md`, 'text/markdown');
+    }, [markdownContent, baseFilename, downloadFile]);
 
     const saveProgress = useCallback(() => {
         const saveData = {
@@ -162,8 +174,8 @@ ${formData.stap7_obstakels.map((item, index) =>
             version: '2.0'
         };
 
-        downloadFile(JSON.stringify(saveData, null, 2), `SMART_Leerdoel_Progress_${formData.algemeneInfo.naam.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`, 'application/json');
-    }, [formData, currentStep, downloadFile]);
+        downloadFile(JSON.stringify(saveData, null, 2), `${baseFilename}_Progress.json`, 'application/json');
+    }, [formData, currentStep, baseFilename, downloadFile]);
 
     return {
         exportAsText,

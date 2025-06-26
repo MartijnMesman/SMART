@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 // Define types for formData for better type safety
 export interface FormData {
@@ -68,7 +68,8 @@ export interface FormData {
     };
 }
 
-const initialFormData: FormData = {
+// Memoized initial form data to prevent recreation on every render
+const getInitialFormData = (): FormData => ({
     algemeneInfo: {
         naam: '',
         opleiding: 'Leisure and Events Management',
@@ -135,21 +136,25 @@ const initialFormData: FormData = {
         nieuweUitdaging: '',
         vervolgOntwikkeling: ''
     }
-};
+});
 
 export function useFormData() {
+    const initialFormData = useMemo(() => getInitialFormData(), [])
     const [formData, setFormData] = useState<FormData>(initialFormData)
 
-    // Utility functions for nested form data
+    // Utility functions for nested form data with performance optimizations
     const setNestedValue = useCallback((obj: any, path: string, value: any) => {
         const keys = path.split('.');
-        let current = obj;
+        const newObj = { ...obj };
+        let current = newObj;
+        
         for (let i = 0; i < keys.length - 1; i++) {
             if (!current[keys[i]]) current[keys[i]] = {};
+            current[keys[i]] = { ...current[keys[i]] };
             current = current[keys[i]];
         }
         current[keys[keys.length - 1]] = value;
-        return { ...obj }; // Return a new object to trigger state update
+        return newObj;
     }, []);
 
     const getNestedValue = useCallback((obj: any, path: string) => {
@@ -160,22 +165,22 @@ export function useFormData() {
         setFormData(prev => setNestedValue(prev, path, value));
     }, [setNestedValue]);
 
-    // Action management functions
+    // Action management functions with performance optimizations
     const addActie = useCallback(() => {
-        setFormData(prev => {
-            const newActies = [...prev.stap6_acties, { actie: '', type: 'regulier', moeilijkheid: 3, impact: 3 }];
-            return { ...prev, stap6_acties: newActies };
-        });
+        setFormData(prev => ({
+            ...prev,
+            stap6_acties: [...prev.stap6_acties, { actie: '', type: 'regulier', moeilijkheid: 3, impact: 3 }]
+        }));
     }, []);
 
     const removeActie = useCallback((index: number) => {
-        setFormData(prev => {
-            const newActies = prev.stap6_acties.filter((_, i) => i !== index);
-            return { ...prev, stap6_acties: newActies };
-        });
+        setFormData(prev => ({
+            ...prev,
+            stap6_acties: prev.stap6_acties.filter((_, i) => i !== index)
+        }));
     }, []);
 
-    // Obstacle management functions
+    // Obstacle management functions with performance optimizations
     const updateObstakel = useCallback((index: number, field: keyof FormData['stap7_obstakels'][0], value: string) => {
         setFormData(prev => {
             const newObstakels = [...prev.stap7_obstakels];
@@ -185,40 +190,57 @@ export function useFormData() {
     }, []);
 
     const addObstakel = useCallback(() => {
-        setFormData(prev => {
-            const newObstakels = [...prev.stap7_obstakels, { obstakel: '', alsDanPlan: '' }];
-            return { ...prev, stap7_obstakels: newObstakels };
-        });
+        setFormData(prev => ({
+            ...prev,
+            stap7_obstakels: [...prev.stap7_obstakels, { obstakel: '', alsDanPlan: '' }]
+        }));
     }, []);
 
     const removeObstakel = useCallback((index: number) => {
-        setFormData(prev => {
-            const newObstakels = prev.stap7_obstakels.filter((_, i) => i !== index);
-            return { ...prev, stap7_obstakels: newObstakels };
-        });
+        setFormData(prev => ({
+            ...prev,
+            stap7_obstakels: prev.stap7_obstakels.filter((_, i) => i !== index)
+        }));
     }, []);
 
-    // Planning management functions
+    // Planning management functions with performance optimizations
     const updatePlanningItem = useCallback((category: keyof FormData['stap8_planning'], index: number, value: string) => {
         setFormData(prev => {
             const newItems = [...(prev.stap8_planning[category] || [])];
             newItems[index] = value;
-            return { ...prev, stap8_planning: { ...prev.stap8_planning, [category]: newItems } };
+            return { 
+                ...prev, 
+                stap8_planning: { 
+                    ...prev.stap8_planning, 
+                    [category]: newItems 
+                } 
+            };
         });
     }, []);
 
     const addPlanningItem = useCallback((category: keyof FormData['stap8_planning']) => {
         setFormData(prev => {
-            const newItems = [...(prev.stap8_planning[category] || [])];
-            newItems.push('');
-            return { ...prev, stap8_planning: { ...prev.stap8_planning, [category]: newItems } };
+            const newItems = [...(prev.stap8_planning[category] || []), ''];
+            return { 
+                ...prev, 
+                stap8_planning: { 
+                    ...prev.stap8_planning, 
+                    [category]: newItems 
+                } 
+            };
         });
     }, []);
 
     const removePlanningItem = useCallback((category: keyof FormData['stap8_planning'], index: number) => {
         setFormData(prev => {
             const newItems = (prev.stap8_planning[category] || []).filter((_, i) => i !== index);
-            return { ...prev, stap8_planning: { ...prev.stap8_planning, [category]: newItems } };
+            return { 
+                ...prev, 
+                stap8_planning: { 
+                    ...prev.stap8_planning, 
+                    [category]: newItems 
+                } 
+            };
         });
     }, []);
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { memo, useCallback } from 'react'
 
 interface Step {
   id: string
@@ -14,12 +14,16 @@ interface StepNavigationProps {
   onStepClick: (stepIndex: number) => void
 }
 
-export default function StepNavigation({ steps, currentStep, onStepClick }: StepNavigationProps) {
-  const getNavButtonClass = (index: number) => {
+const StepNavigation = memo(function StepNavigation({ steps, currentStep, onStepClick }: StepNavigationProps) {
+  const getNavButtonClass = useCallback((index: number) => {
     if (index === currentStep) return 'bg-purple-600 text-white'
     if (index < currentStep) return 'bg-green-100 text-green-800'
     return 'bg-gray-100 text-gray-600'
-  }
+  }, [currentStep])
+
+  const handleStepClick = useCallback((index: number) => {
+    onStepClick(index)
+  }, [onStepClick])
 
   return (
     <div className="bg-white border-b border-gray-200 overflow-x-auto">
@@ -29,7 +33,7 @@ export default function StepNavigation({ steps, currentStep, onStepClick }: Step
             <button
               key={step.id}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border-none cursor-pointer transition-all duration-200 whitespace-nowrap hover:bg-gray-200 ${getNavButtonClass(index)} ${index === currentStep ? 'hover:bg-purple-700' : ''}`}
-              onClick={() => onStepClick(index)}
+              onClick={() => handleStepClick(index)}
             >
               {step.icon} {step.title}
             </button>
@@ -38,4 +42,6 @@ export default function StepNavigation({ steps, currentStep, onStepClick }: Step
       </div>
     </div>
   )
-}
+})
+
+export default StepNavigation

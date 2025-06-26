@@ -1,12 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 
 interface HeaderProps {
   saveStatus: string
 }
 
-export default function Header({ saveStatus }: HeaderProps) {
+const Header = memo(function Header({ saveStatus }: HeaderProps) {
   return (
     <div className="bg-white shadow-sm border-b-4 border-pink-600">
       <div className="max-w-screen-xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -25,4 +25,6 @@ export default function Header({ saveStatus }: HeaderProps) {
       </div>
     </div>
   )
-}
+})
+
+export default Header

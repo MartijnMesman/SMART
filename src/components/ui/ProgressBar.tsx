@@ -1,13 +1,13 @@
 'use client'
 
-import React from 'react'
+import React, { memo } from 'react'
 
 interface ProgressBarProps {
   currentStep: number
   totalSteps: number
 }
 
-export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
+const ProgressBar = memo(function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
   const progressPercentage = Math.round(((currentStep + 1) / totalSteps) * 100)
 
   return (
@@ -26,4 +26,6 @@ export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProp
       </div>
     </div>
   )
-}
+})
+
+export default ProgressBar
