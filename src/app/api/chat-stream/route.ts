@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, Tool } from '@google/generative-ai'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 
 // Initialize Gemini AI client
@@ -10,7 +10,7 @@ function base64ToBuffer(base64: string): Buffer {
   return Buffer.from(base64Data, 'base64')
 }
 
-// Google Search tool configuratie
+// Google Search tool configuration
 const googleSearchTool = {
   googleSearch: {}
 }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request data
     const body = await request.json()
-    console.log('Received request body:', body)
+    console.log('Received request body:', JSON.stringify(body, null, 2))
     
     const { message, image, images, useGrounding = true, aiModel = 'smart' } = body
 
@@ -51,14 +51,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Selecteer het juiste model op basis van aiModel
-    const modelName = aiModel === 'pro' ? 'gemini-2.5-pro-preview-06-05' :
-                     aiModel === 'smart' ? 'gemini-2.5-flash-preview-05-20' :
-                     'gemini-2.0-flash-exp' // internet
+    // Select the correct model based on aiModel
+    const modelName = aiModel === 'pro' ? 'gemini-2.0-flash-exp' :
+                     aiModel === 'smart' ? 'gemini-2.0-flash-exp' :
+                     'gemini-2.0-flash-exp' // Use 2.0 for all models for now
+    
+    console.log('Using model:', modelName)
     const model = genAI.getGenerativeModel({ model: modelName })
 
-    // Configureer tools array - grounding alleen voor Gemini 2.0 (internet model)
+    // Configure tools array - grounding only for internet model
     const tools = (aiModel === 'internet' && useGrounding) ? [googleSearchTool] : []
+    console.log('Using tools:', tools)
 
     // Create streaming response
     const stream = new ReadableStream({
@@ -69,8 +72,10 @@ export async function POST(request: NextRequest) {
           // Helper function to generate content with fallback
           const generateStreamWithFallback = async (requestConfig: any) => {
             try {
+              console.log('Generating content with config:', JSON.stringify(requestConfig, null, 2))
               return await model.generateContentStream(requestConfig)
             } catch (error: any) {
+              console.error('Generation error:', error)
               // If grounding fails, retry without tools
               if (useGrounding && (error.message?.includes('Search Grounding is not supported') || 
                                   error.message?.includes('google_search_retrieval is not supported'))) {
@@ -96,7 +101,7 @@ export async function POST(request: NextRequest) {
             
             result = await generateStreamWithFallback({
               contents: [{ role: 'user', parts: [{ text: message }, ...imageParts] }],
-              tools: tools
+              ...(tools.length > 0 && { tools })
             })
           } else if (image) {
             // Backward compatibility - single image (legacy)
@@ -111,15 +116,17 @@ export async function POST(request: NextRequest) {
             
             result = await generateStreamWithFallback({
               contents: [{ role: 'user', parts: [{ text: message }, imagePart] }],
-              tools: tools
+              ...(tools.length > 0 && { tools })
             })
           } else {
             // Text only
             result = await generateStreamWithFallback({
               contents: [{ role: 'user', parts: [{ text: message }] }],
-              tools: tools
+              ...(tools.length > 0 && { tools })
             })
           }
+
+          console.log('Stream result obtained, starting to process chunks')
 
           // Stream the response token by token
           for await (const chunk of result.stream) {
@@ -163,11 +170,15 @@ export async function POST(request: NextRequest) {
             message: error instanceof Error ? error.message : 'Streaming error occurred'
           })
           
-          controller.enqueue(
-            new TextEncoder().encode(`data: ${errorData}\n\n`)
-          )
-          
-          controller.close()
+          try {
+            controller.enqueue(
+              new TextEncoder().encode(`data: ${errorData}\n\n`)
+            )
+            
+            controller.close()
+          } catch (controllerError) {
+            console.log('Controller already closed during error handling')
+          }
         }
       }
     })
@@ -198,4 +209,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}
