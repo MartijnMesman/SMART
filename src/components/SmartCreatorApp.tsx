@@ -521,9 +521,9 @@ ${formData.stap7_obstakels.map((item, index) =>
     }, []);
 
     const getNavButtonClass = (index: number) => {
-        if (index === currentStep) return 'current';
-        if (index < currentStep) return 'completed';
-        return 'pending';
+        if (index === currentStep) return 'bg-purple-600 text-white';
+        if (index < currentStep) return 'bg-green-100 text-green-800';
+        return 'bg-gray-100 text-gray-600';
     };
 
     const renderStepContent = () => {
@@ -557,44 +557,49 @@ ${formData.stap7_obstakels.map((item, index) =>
     const progressPercentage = updateProgress();
 
     return (
-        <>
+        <div className="font-sans leading-relaxed text-gray-700 bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
             {/* Header */}
-            <div className="header">
-                <div className="header-content max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="logo-section flex items-center gap-4">
-                        <div className="logo">i</div>
-                        <div className="title-section">
-                            <h1>SMART Leerdoel Creator</h1>
-                            <p>inholland hogeschool</p>
+            <div className="bg-white shadow-sm border-b-4 border-pink-600">
+                <div className="max-w-screen-xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-pink-600 rounded-lg flex items-center justify-center text-white text-2xl font-bold">
+                            i
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900 tracking-tight">SMART Leerdoel Creator</h1>
+                            <p className="text-sm text-pink-600 font-medium">inholland hogeschool</p>
                         </div>
                     </div>
-                    <div id="auto-save-status" className="text-xs text-gray-600">
-                        Auto-save: <span id="save-status">{saveStatus}</span>
+                    <div className="text-xs text-gray-600">
+                        Auto-save: <span className="font-medium">{saveStatus}</span>
                     </div>
                 </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="progress-section">
-                <div className="progress-content max-w-screen-xl mx-auto px-4 py-2">
-                    <div className="progress-info flex justify-between text-xs text-gray-600 mb-2">
-                        <span>Stap <span id="current-step-number">{currentStep + 1}</span> van <span id="total-steps">{steps.length}</span></span>
-                        <span><span id="progress-percentage">{progressPercentage}</span>% voltooid</span>
+            <div className="bg-white border-b border-gray-200">
+                <div className="max-w-screen-xl mx-auto px-4 py-2">
+                    <div className="flex justify-between text-xs text-gray-600 mb-2">
+                        <span>Stap {currentStep + 1} van {steps.length}</span>
+                        <span>{progressPercentage}% voltooid</span>
                     </div>
-                    <div className="progress-bar">
-                        <div className="progress-fill" style={{ width: `${progressPercentage}%` }}></div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-gradient-to-r from-pink-600 to-pink-800 transition-all duration-500 ease-out"
+                            style={{ width: `${progressPercentage}%` }}
+                        ></div>
                     </div>
                 </div>
             </div>
 
             {/* Navigation */}
-            <div className="nav-section">
-                <div className="nav-content max-w-screen-xl mx-auto px-4 py-3">
-                    <div className="nav-buttons flex gap-1 min-w-max">
+            <div className="bg-white border-b border-gray-200 overflow-x-auto">
+                <div className="max-w-screen-xl mx-auto px-4 py-3">
+                    <div className="flex gap-1 min-w-max pb-2 md:pb-0">
                         {steps.map((step, index) => (
                             <button
                                 key={step.id}
-                                className={`nav-button flex items-center gap-2 px-3 py-2 rounded-lg text-sm border-none cursor-pointer transition-all duration-200 whitespace-nowrap ${getNavButtonClass(index)}`}
+                                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border-none cursor-pointer transition-all duration-200 whitespace-nowrap hover:bg-gray-200 ${getNavButtonClass(index)} ${index === currentStep ? 'hover:bg-purple-700' : ''}`}
                                 onClick={() => goToStep(index)}
                             >
                                 {step.icon} {step.title}
@@ -605,8 +610,8 @@ ${formData.stap7_obstakels.map((item, index) =>
             </div>
 
             {/* Main Content */}
-            <div className="main-content max-w-screen-lg mx-auto px-4 py-8">
-                <div className="step-container">
+            <div className="max-w-screen-lg mx-auto px-4 py-8">
+                <div className="bg-white rounded-xl shadow-lg p-8">
                     <div id="step-content">
                         {renderStepContent()}
                     </div>
@@ -614,26 +619,37 @@ ${formData.stap7_obstakels.map((item, index) =>
             </div>
 
             {/* Footer Navigation */}
-            <div className="footer-nav">
-                <div className="footer-content max-w-screen-lg mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="bg-white border-t border-gray-200 mt-8">
+                <div className="max-w-screen-lg mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
                     <button
-                        className="btn btn-secondary"
-                        id="prev-btn"
+                        className={`inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 ${
+                            currentStep === 0 
+                                ? 'bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed' 
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
                         onClick={previousStep}
                         disabled={currentStep === 0}
                     >
                         ← Vorige
                     </button>
                     <div className="flex gap-4">
-                        <button className="btn btn-success" onClick={saveProgress}>💾 Opslaan</button>
-                        <label className="btn btn-primary cursor-pointer">
+                        <button 
+                            className="inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 bg-green-500 text-white hover:bg-green-600"
+                            onClick={saveProgress}
+                        >
+                            💾 Opslaan
+                        </button>
+                        <label className="inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 bg-purple-600 text-white hover:bg-purple-700">
                             📁 Laden
                             <input type="file" accept=".json" onChange={loadProgress} className="hidden" />
                         </label>
                     </div>
                     <button
-                        className="btn btn-primary"
-                        id="next-btn"
+                        className={`inline-flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 ${
+                            currentStep === steps.length - 1 
+                                ? 'bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed' 
+                                : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
                         onClick={nextStep}
                         disabled={currentStep === steps.length - 1}
                     >
@@ -643,9 +659,12 @@ ${formData.stap7_obstakels.map((item, index) =>
             </div>
 
             {/* Success Message */}
-            <div className="success-message" ref={successMessageRef}>
+            <div 
+                ref={successMessageRef}
+                className="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 hidden"
+            >
                 ✅ Succesvol opgeslagen!
             </div>
-        </>
+        </div>
     );
 }
