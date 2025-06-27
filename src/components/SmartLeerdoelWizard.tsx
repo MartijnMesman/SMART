@@ -260,14 +260,28 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
             <div className="info-box green">
               <h3>🌟 Waarom deze stap?</h3>
               <p className="text-gray-700">
-                In lastige situaties komen vaak de valkuilen van één van jouw kernkwaliteiten bovendrijven. 
-                Dit zorgt ervoor dat je positiever naar jezelf kunt kijken, ook in moeilijke situaties.
+                In uitdagende situaties word je geconfronteerd met wat je te ontwikkelen hebt. Daar staat in het kernkwadrant echter een kernkwaliteit tegenover
               </p>
+            </div>
+
+            {/* Kernkwadrant afbeelding */}
+            <div className="my-6 flex justify-center">
+              <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+                <img 
+                  src="/images/{ABEB56C9-C43D-4D16-98B8-BCC3EADF5FF6}.png" 
+                  alt="Kernkwadrant model" 
+                  className="max-w-full h-auto rounded-lg"
+                  style={{ maxHeight: '400px' }}
+                />
+                <p className="text-center text-sm text-gray-600 mt-2 italic">
+                  Het Kernkwadrant model - ontdek je kernkwaliteiten
+                </p>
+              </div>
             </div>
 
             <div className="form-group">
               <label className="form-label">
-                Welke kernkwaliteit gaat schuil achter jouw valkuil?
+                Welke kernkwaliteit staat tegenover jouw uitdaging?
               </label>
               <div className="flex gap-2">
                 <input
