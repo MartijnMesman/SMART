@@ -640,7 +640,17 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                     value={tempInput}
                     onChange={(e) => setTempInput(e.target.value)}
                     placeholder="Bijvoorbeeld: Alarm op telefoon, notitie op bureau..."
-                    onKeyPress={(e) => e.key === 'Enter' && addToArray('planning', tempInput)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && tempInput.trim()) {
+                        updateFormData({
+                          planning: { 
+                            ...formData.planning, 
+                            cues: [...formData.planning.cues, tempInput.trim()] 
+                          }
+                        })
+                        setTempInput('')
+                      }
+                    }}
                   />
                   <button
                     type="button"
@@ -728,8 +738,8 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                     value={tempInput}
                     onChange={(e) => setTempInput(e.target.value)}
                     placeholder="Bijvoorbeeld: Ik voel me zekerder, ik krijg positieve feedback..."
-                    onKeyPress={(e) => e.key === 'Enter' && {
-                      if (tempInput.trim()) {
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && tempInput.trim()) {
                         updateFormData({
                           reflectie: { 
                             ...formData.reflectie, 
