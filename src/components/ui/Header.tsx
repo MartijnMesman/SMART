@@ -4,9 +4,10 @@ import React, { memo } from 'react'
 
 interface HeaderProps {
   saveStatus: string
+  securityStatus?: React.ReactNode
 }
 
-const Header = memo(function Header({ saveStatus }: HeaderProps) {
+const Header = memo(function Header({ saveStatus, securityStatus }: HeaderProps) {
   return (
     <div className="bg-white shadow-sm border-b-4 border-pink-600">
       <div className="max-w-screen-xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -19,8 +20,11 @@ const Header = memo(function Header({ saveStatus }: HeaderProps) {
             <p className="text-sm text-pink-600 font-medium">inholland hogeschool</p>
           </div>
         </div>
-        <div className="text-xs text-gray-600">
-          Auto-save: <span className="font-medium">{saveStatus}</span>
+        <div className="flex items-center gap-4">
+          <div className="text-xs text-gray-600">
+            Auto-save: <span className="font-medium">{saveStatus}</span>
+          </div>
+          {securityStatus}
         </div>
       </div>
     </div>

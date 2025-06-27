@@ -1,42 +1,38 @@
 {
-  "name": "gemini-chatbot",
+  "name": "smart-leerdoel-creator",
   "version": "0.1.0",
   "private": true,
-  "description": "Een Next.js template met Gemini AI integratie, geoptimaliseerd voor Bolt + Netlify deployment",
+  "description": "Een veilige Next.js applicatie voor het creëren van SMART leerdoelen met geavanceerde security features",
   "keywords": [
     "nextjs",
-    "gemini",
-    "ai",
-    "chatbot",
-    "netlify",
-    "bolt",
+    "smart-goals",
+    "education",
+    "security",
+    "privacy",
+    "gdpr",
     "typescript"
   ],
-  "author": "Tom Naberink",
+  "author": "Inholland Hogeschool",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "netlify-build": "next build"
+    "security-audit": "npm audit",
+    "type-check": "tsc --noEmit"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "@netlify/plugin-nextjs": "^4.41.3",
-    "docx": "^9.5.0",
-    "fs": "^0.0.1-security",
-    "mammoth": "^1.9.1",
+    "crypto-js": "^4.2.0",
     "next": "15.3.3",
-    "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.10.2",
-    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "autoprefixer": "^10.4.20",
