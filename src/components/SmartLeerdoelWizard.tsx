@@ -858,18 +858,19 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
           
           {/* Navigation */}
           <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="btn btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ← Vorige stap
-            </button>
+            {currentStep > 1 && (
+              <button
+                onClick={prevStep}
+                className="btn btn-secondary"
+              >
+                ← Vorige stap
+              </button>
+            )}
             
             <button
               onClick={nextStep}
               disabled={currentStep === totalSteps}
-              className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed ${currentStep === 1 ? 'ml-auto' : ''}`}
             >
               {currentStep === totalSteps ? '🎯 Voltooid!' : 'Volgende stap →'}
             </button>
