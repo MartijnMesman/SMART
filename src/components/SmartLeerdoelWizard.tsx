@@ -371,7 +371,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                   onChange={(e) => updateFormData({
                     smartLeerdoel: { ...formData.smartLeerdoel, meetbaar: e.target.value }
                   })}
-                  placeholder="Bijvoorbeeld: Ik kan een 10-minuten presentatie geven zonder..."
+                  placeholder="Bijvoorbeeld: Ik kan een 10-minuten presentatie geven zonder... en krijg hier positieve feedback op van..."
                 />
               </div>
 
