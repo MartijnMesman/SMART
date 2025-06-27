@@ -1,6 +1,15 @@
 'use client'
 
+import { useState } from 'react'
+import SmartLeerdoelWizard from '@/components/SmartLeerdoelWizard'
+
 export default function Home() {
+  const [showWizard, setShowWizard] = useState(false)
+
+  if (showWizard) {
+    return <SmartLeerdoelWizard onBack={() => setShowWizard(false)} />
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
       {/* Header */}
@@ -68,7 +77,7 @@ export default function Home() {
             <div className="mt-8">
               <button 
                 className="bg-purple-600 text-white px-8 py-3 rounded-lg hover:bg-purple-700 transition-colors text-lg font-medium"
-                onClick={() => alert('De SMART Leerdoel Creator is succesvol geladen! 🎉')}
+                onClick={() => setShowWizard(true)}
               >
                 🚀 Start met je SMART leerdoel
               </button>
