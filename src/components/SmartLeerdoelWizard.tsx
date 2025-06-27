@@ -33,6 +33,13 @@ interface FormData {
   
   // Stap 5: Startpunt
   startpunt: number
+  startpuntVragen: {
+    huidigePositie: string
+    waaromNietNul: string
+    dichtstBijTien: string
+    hoeGelukt: string
+    eenStapVerder: string
+  }
   
   // Stap 6: Acties
   acties: string[]
@@ -72,6 +79,13 @@ const initialFormData: FormData = {
     tijdgebonden: ''
   },
   startpunt: 5,
+  startpuntVragen: {
+    huidigePositie: '',
+    waaromNietNul: '',
+    dichtstBijTien: '',
+    hoeGelukt: '',
+    eenStapVerder: ''
+  },
   acties: [],
   obstakels: [],
   planning: {
@@ -469,6 +483,84 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                 {formData.startpunt >= 7 && formData.startpunt <= 8 && "Je bent al goed op weg! Focus op verfijning en verdieping."}
                 {formData.startpunt >= 9 && "Je bent al ver gevorderd. Zoek naar uitdagende aspecten om te perfectioneren."}
               </p>
+            </div>
+
+            {/* Nieuwe startpunt vragen */}
+            <div className="space-y-4 mt-6">
+              <div className="form-group">
+                <label className="form-label">
+                  Waar sta je op dit moment ten aanzien van je SMART leerdoel op een schaal van 0 tot 10?
+                </label>
+                <textarea
+                  className="form-textarea"
+                  rows={2}
+                  value={formData.startpuntVragen.huidigePositie}
+                  onChange={(e) => updateFormData({
+                    startpuntVragen: { ...formData.startpuntVragen, huidigePositie: e.target.value }
+                  })}
+                  placeholder="Bijvoorbeeld: Ik sta op een 5 omdat ik al enige ervaring heb met..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Wat kun je al waardoor je niet op 0 staat?
+                </label>
+                <textarea
+                  className="form-textarea"
+                  rows={2}
+                  value={formData.startpuntVragen.waaromNietNul}
+                  onChange={(e) => updateFormData({
+                    startpuntVragen: { ...formData.startpuntVragen, waaromNietNul: e.target.value }
+                  })}
+                  placeholder="Bijvoorbeeld: Ik heb al ervaring met... en kan al..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  In welke situatie in het verleden heb je het dichtst bij de 10 gestaan?
+                </label>
+                <textarea
+                  className="form-textarea"
+                  rows={2}
+                  value={formData.startpuntVragen.dichtstBijTien}
+                  onChange={(e) => updateFormData({
+                    startpuntVragen: { ...formData.startpuntVragen, dichtstBijTien: e.target.value }
+                  })}
+                  placeholder="Bijvoorbeeld: Tijdens mijn stage toen ik een presentatie gaf aan..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Hoe is je dat toen gelukt?
+                </label>
+                <textarea
+                  className="form-textarea"
+                  rows={2}
+                  value={formData.startpuntVragen.hoeGelukt}
+                  onChange={(e) => updateFormData({
+                    startpuntVragen: { ...formData.startpuntVragen, hoeGelukt: e.target.value }
+                  })}
+                  placeholder="Bijvoorbeeld: Door veel te oefenen, goede voorbereiding, steun van..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Als je één stap verder op de schaal staat, wat doe je dan anders en wat heb je nodig om daar te komen?
+                </label>
+                <textarea
+                  className="form-textarea"
+                  rows={3}
+                  value={formData.startpuntVragen.eenStapVerder}
+                  onChange={(e) => updateFormData({
+                    startpuntVragen: { ...formData.startpuntVragen, eenStapVerder: e.target.value }
+                  })}
+                  placeholder="Bijvoorbeeld: Dan zou ik meer zelfvertrouwen hebben en... Ik heb daarvoor nodig..."
+                />
+              </div>
             </div>
           </div>
         )
