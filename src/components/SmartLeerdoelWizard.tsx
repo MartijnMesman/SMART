@@ -226,7 +226,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
 
             <div className="form-group">
               <label className="form-label">
-                Wat zijn jouw sterke punten en kernkwaliteiten?
+                Wat zijn jouw kernkwaliteiten?
               </label>
               <div className="flex gap-2">
                 <input
