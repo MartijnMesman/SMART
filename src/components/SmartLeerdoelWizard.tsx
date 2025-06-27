@@ -580,7 +580,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
 
             <div className="form-group">
               <label className="form-label">
-                Welke concrete acties ga je ondernemen om je leerdoel te bereiken?
+                Welke drie concrete acties ga je ondernemen om je leerdoel te bereiken?
               </label>
               <div className="flex gap-2">
                 <input
