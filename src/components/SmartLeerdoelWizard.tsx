@@ -175,7 +175,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                   className="form-input"
                   value={tempInput}
                   onChange={(e) => setTempInput(e.target.value)}
-                  placeholder="Bijvoorbeeld: tijdmanagement, presenteren, concentratie..."
+                  placeholder="Bijvoorbeeld: Ik vind het lastig om...bv. tijdsmanagement, presenteren, concentreren, samenwerken"
                   onKeyPress={(e) => e.key === 'Enter' && addToArray('uitdagingen', tempInput)}
                 />
                 <button
