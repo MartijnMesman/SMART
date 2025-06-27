@@ -214,19 +214,19 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
         return (
           <div>
             <div className="hero-icon">💪</div>
-            <h2 className="step-title">Stap 2: Kernkwaliteiten herkennen</h2>
+            <h2 className="step-title">Stap 2: Kernkwadrant herkennen</h2>
             
             <div className="info-box green">
               <h3>🌟 Waarom deze stap?</h3>
               <p className="text-gray-700">
-                Je kernkwaliteiten zijn je sterke punten. Door deze te herkennen, kun je ze inzetten 
-                om je uitdagingen aan te pakken en je leerdoel te bereiken.
+                In lastige situaties komen vaak de valkuilen van één van jouw kernkwaliteiten bovendrijven. 
+                Dit zorgt ervoor dat je positiever naar jezelf kunt kijken, ook in moeilijke situaties.
               </p>
             </div>
 
             <div className="form-group">
               <label className="form-label">
-                Wat zijn jouw kernkwaliteiten?
+                Welke kernkwaliteit gaat schuil achter jouw valkuil?
               </label>
               <div className="flex gap-2">
                 <input
