@@ -659,7 +659,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
             <div className="info-box yellow">
               <h3>🛡️ Voorbereid zijn op uitdagingen</h3>
               <p className="text-gray-700">
-                Door mogelijke obstakels van tevoren te bedenken, kun je er beter mee omgaan als ze zich voordoen.
+                Welke obstakels zou je kunnen tegenkomen en hoe ga je deze overwinnen? Vul dit voor iedere bovenstaande actie in en zie het eindresultaat in de tabel onder aan deze pagina.
               </p>
             </div>
 
@@ -679,9 +679,6 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
             )}
 
             <div className="form-group">
-              <label className="form-label">
-                Welke obstakels zou je kunnen tegenkomen?
-              </label>
               <div className="space-y-4">
                 <div className="bg-gray-50 p-4 rounded-lg border">
                   <div className="form-group">
