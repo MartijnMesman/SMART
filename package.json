@@ -2,40 +2,18 @@
   "name": "smart-leerdoel-creator",
   "version": "0.1.0",
   "private": true,
-  "description": "Een veilige Next.js applicatie voor het creëren van SMART leerdoelen met geavanceerde security features",
-  "keywords": [
-    "nextjs",
-    "smart-goals",
-    "education",
-    "security",
-    "privacy",
-    "gdpr",
-    "typescript"
-  ],
-  "author": "Inholland Hogeschool",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "security-audit": "npm audit",
-    "type-check": "tsc --noEmit"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "lint": "next lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "crypto-js": "^4.2.0",
-    "docx": "^8.5.0",
-    "mammoth": "^1.8.0",
     "next": "15.3.3",
-    "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
