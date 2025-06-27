@@ -387,14 +387,14 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                   onChange={(e) => updateFormData({
                     smartLeerdoel: { ...formData.smartLeerdoel, acceptabel: e.target.value }
                   })}
-                  placeholder="Bijvoorbeeld: Dit helpt me bij mijn stage en toekomstige carrière..."
+                  placeholder="Bijvoorbeeld: Ik wil graag mijn ideeën op een heldere manier overbrengen op andere professionals..."
                 />
               </div>
 
               <div className="form-group">
                 <label className="form-label">
                   <span className="smart-circle complete">R</span>
-                  Realistisch - Is dit doel haalbaar voor jou?
+                  Realistisch - Is dit doel haalbaar én voldoende uitdagend voor jou?
                 </label>
                 <textarea
                   className="form-textarea"
