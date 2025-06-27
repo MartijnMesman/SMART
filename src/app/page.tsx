@@ -1,12 +1,5 @@
 'use client'
 
-import { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'SMART Leerdoel Creator - Inholland Hogeschool',
-  description: 'Een tool voor het creëren van SMART leerdoelen',
-}
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
