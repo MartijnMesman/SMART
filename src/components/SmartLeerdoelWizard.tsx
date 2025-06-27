@@ -208,7 +208,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
 
             <div className="form-group">
               <label className="form-label">
-                Welke uitdagingen ervaar je momenteel in je studie of persoonlijke ontwikkeling?
+                Wat is de grootste uitdaging die je momenteel in je studie of persoonlijke ontwikkeling ervaart?
               </label>
               <div className="flex gap-2">
                 <input
