@@ -1,14 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  // Simplified config for WebContainer compatibility
   experimental: {
-    // Disable problematic features that can cause workStore issues
     serverComponentsExternalPackages: [],
   },
-  // Force static generation to avoid runtime issues
-  output: 'standalone',
-  // Disable edge runtime for now
-  runtime: 'nodejs',
 }
 
 module.exports = nextConfig
