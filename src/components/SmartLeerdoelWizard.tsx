@@ -6,6 +6,11 @@ interface SmartLeerdoelWizardProps {
   onBack: () => void
 }
 
+interface ObstakelMetOverwinning {
+  obstakel: string
+  overwinning: string
+}
+
 interface FormData {
   // Stap 1: Uitdagingen
   uitdagingen: string[]
@@ -44,8 +49,8 @@ interface FormData {
   // Stap 6: Acties
   acties: string[]
   
-  // Stap 7: Obstakels
-  obstakels: string[]
+  // Stap 7: Obstakels met overwinningen
+  obstakelsMetOverwinningen: ObstakelMetOverwinning[]
   
   // Stap 8: Planning
   planning: {
@@ -87,7 +92,7 @@ const initialFormData: FormData = {
     eenStapVerder: ''
   },
   acties: [],
-  obstakels: [],
+  obstakelsMetOverwinningen: [],
   planning: {
     wanneer: '',
     waar: '',
@@ -103,6 +108,8 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [tempInput, setTempInput] = useState('')
+  const [tempObstakel, setTempObstakel] = useState('')
+  const [tempOverwinning, setTempOverwinning] = useState('')
 
   const totalSteps = 9
 
@@ -121,6 +128,26 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
   const removeFromArray = (field: keyof FormData, index: number) => {
     const currentArray = formData[field] as string[]
     updateFormData({ [field]: currentArray.filter((_, i) => i !== index) })
+  }
+
+  const addObstakelMetOverwinning = () => {
+    if (tempObstakel.trim() && tempOverwinning.trim()) {
+      const newObstakel: ObstakelMetOverwinning = {
+        obstakel: tempObstakel.trim(),
+        overwinning: tempOverwinning.trim()
+      }
+      updateFormData({
+        obstakelsMetOverwinningen: [...formData.obstakelsMetOverwinningen, newObstakel]
+      })
+      setTempObstakel('')
+      setTempOverwinning('')
+    }
+  }
+
+  const removeObstakelMetOverwinning = (index: number) => {
+    updateFormData({
+      obstakelsMetOverwinningen: formData.obstakelsMetOverwinningen.filter((_, i) => i !== index)
+    })
   }
 
   const nextStep = () => {
@@ -143,7 +170,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
       bangeScore,
       smartComplete,
       totalActions: formData.acties.length,
-      totalObstacles: formData.obstakels.length,
+      totalObstacles: formData.obstakelsMetOverwinningen.length,
       hasPlan: formData.planning.wanneer && formData.planning.waar
     }
   }
@@ -636,46 +663,138 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                Welke obstakels of uitdagingen zou je kunnen tegenkomen?
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  className="form-input"
-                  value={tempInput}
-                  onChange={(e) => setTempInput(e.target.value)}
-                  placeholder="Bijvoorbeeld: Gebrek aan tijd, zenuwen, technische problemen..."
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray('obstakels', tempInput)}
-                />
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => addToArray('obstakels', tempInput)}
-                >
-                  Toevoegen
-                </button>
-              </div>
-            </div>
-
-            {formData.obstakels.length > 0 && (
-              <div className="card">
-                <h4 className="font-medium text-gray-800 mb-3">Mogelijke obstakels:</h4>
+            {/* Toon acties uit stap 6 */}
+            {formData.acties.length > 0 && (
+              <div className="card mb-6">
+                <h4 className="font-medium text-gray-800 mb-3">Jouw acties uit stap 6:</h4>
                 <div className="space-y-2">
-                  {formData.obstakels.map((obstakel, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                      <span className="text-gray-700">{obstakel}</span>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => removeFromArray('obstakels', index)}
-                      >
-                        ×
-                      </button>
+                  {formData.acties.map((actie, index) => (
+                    <div key={index} className="bg-blue-50 p-2 rounded border border-blue-200">
+                      <span className="text-blue-800 font-medium">Actie {index + 1}:</span>
+                      <span className="text-blue-700 ml-2">{actie}</span>
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label">
+                Welke obstakels zou je kunnen tegenkomen?
+              </label>
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <div className="form-group">
+                    <label className="form-label text-sm">Obstakel:</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={tempObstakel}
+                      onChange={(e) => setTempObstakel(e.target.value)}
+                      placeholder="Bijvoorbeeld: Gebrek aan tijd, zenuwen, technische problemen..."
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label text-sm">Hoe overwin je dit obstakel?</label>
+                    <textarea
+                      className="form-textarea"
+                      rows={2}
+                      value={tempOverwinning}
+                      onChange={(e) => setTempOverwinning(e.target.value)}
+                      placeholder="Bijvoorbeeld: Door een vaste planning te maken, ademhalingsoefeningen te doen, backup apparatuur klaar te hebben..."
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={addObstakelMetOverwinning}
+                    disabled={!tempObstakel.trim() || !tempOverwinning.trim()}
+                  >
+                    Obstakel + Overwinning toevoegen
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {formData.obstakelsMetOverwinningen.length > 0 && (
+              <div className="card">
+                <h4 className="font-medium text-gray-800 mb-3">Obstakels en overwinningen:</h4>
+                <div className="space-y-3">
+                  {formData.obstakelsMetOverwinningen.map((item, index) => (
+                    <div key={index} className="bg-white p-3 rounded border">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="mb-2">
+                            <span className="text-red-600 font-medium">Obstakel:</span>
+                            <span className="text-gray-700 ml-2">{item.obstakel}</span>
+                          </div>
+                          <div>
+                            <span className="text-green-600 font-medium">Overwinning:</span>
+                            <span className="text-gray-700 ml-2">{item.overwinning}</span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-danger ml-3"
+                          onClick={() => removeObstakelMetOverwinning(index)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actie-Obstakel-Overwinning Tabel */}
+            {formData.acties.length > 0 && formData.obstakelsMetOverwinningen.length > 0 && (
+              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">📋 Actieplan Overzicht</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Actie</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Obstakel</th>
+                        <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Overwinning</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formData.acties.map((actie, index) => {
+                        const obstakel = formData.obstakelsMetOverwinningen[index]
+                        return (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-2">
+                              <span className="font-medium text-blue-700">Actie {index + 1}:</span>
+                              <br />
+                              <span className="text-gray-700">{actie}</span>
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2">
+                              {obstakel ? (
+                                <span className="text-red-600">{obstakel.obstakel}</span>
+                              ) : (
+                                <span className="text-gray-400 italic">Nog geen obstakel toegevoegd</span>
+                              )}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2">
+                              {obstakel ? (
+                                <span className="text-green-600">{obstakel.overwinning}</span>
+                              ) : (
+                                <span className="text-gray-400 italic">Nog geen overwinning toegevoegd</span>
+                              )}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {formData.acties.length > formData.obstakelsMetOverwinningen.length && (
+                  <p className="text-orange-600 text-sm mt-2">
+                    💡 Tip: Voeg nog {formData.acties.length - formData.obstakelsMetOverwinningen.length} obstakel(s) toe om je actieplan compleet te maken.
+                  </p>
+                )}
               </div>
             )}
           </div>
