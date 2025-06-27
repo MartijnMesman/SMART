@@ -285,11 +285,11 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
 
             <div className="space-y-4">
               {[
-                { key: 'bewust', label: 'Bewust', description: 'Ben je je bewust van waarom dit leerdoel belangrijk is?' },
-                { key: 'acceptabel', label: 'Acceptabel', description: 'Vind je het acceptabel om tijd en energie in dit doel te investeren?' },
-                { key: 'nodig', label: 'Nodig', description: 'Is dit leerdoel echt nodig voor jouw ontwikkeling?' },
-                { key: 'gewenst', label: 'Gewenst', description: 'Wil je dit leerdoel echt bereiken?' },
-                { key: 'energiek', label: 'Energiek', description: 'Geeft het denken aan dit leerdoel je energie?' }
+                { key: 'bewust', label: 'Belangrijk', description: 'Ben je je bewust van waarom dit leerdoel belangrijk is voor jou?' },
+                { key: 'acceptabel', label: 'Authentiek', description: 'Past het bij de ontwikkeling die je door wil maken?' },
+                { key: 'nodig', label: 'Nuttig', description: 'Vinden mensen in je omgeving het nuttig dat je hieraan werkt?' },
+                { key: 'gewenst', label: 'Geloofwaardig', description: 'Denk je dat je dat je hier aan kunt werken?' },
+                { key: 'energiek', label: 'Enthousiasmerend', description: 'Word je enthousiast als je erover nadenkt dat je je hierin gaat ontwikkelen?' }
               ].map(({ key, label, description }) => (
                 <div key={key} className="checkbox-group">
                   <input
