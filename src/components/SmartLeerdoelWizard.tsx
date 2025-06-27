@@ -18,22 +18,22 @@ interface FormData {
   // Stap 2: Kernkwaliteiten
   kernkwaliteiten: string[]
   
-  // Stap 3: BANGE check
-  bangeCheck: {
-    bewust: boolean
-    acceptabel: boolean
-    nodig: boolean
-    gewenst: boolean
-    energiek: boolean
-  }
-  
-  // Stap 4: SMART leerdoel
+  // Stap 3: SMART leerdoel (was stap 4)
   smartLeerdoel: {
     specifiek: string
     meetbaar: string
     acceptabel: string
     realistisch: string
     tijdgebonden: string
+  }
+  
+  // Stap 4: BANGE check (was stap 3)
+  bangeCheck: {
+    bewust: boolean
+    acceptabel: boolean
+    nodig: boolean
+    gewenst: boolean
+    energiek: boolean
   }
   
   // Stap 5: Startpunt
@@ -69,19 +69,19 @@ interface FormData {
 const initialFormData: FormData = {
   uitdagingen: [],
   kernkwaliteiten: [],
-  bangeCheck: {
-    bewust: false,
-    acceptabel: false,
-    nodig: false,
-    gewenst: false,
-    energiek: false
-  },
   smartLeerdoel: {
     specifiek: '',
     meetbaar: '',
     acceptabel: '',
     realistisch: '',
     tijdgebonden: ''
+  },
+  bangeCheck: {
+    bewust: false,
+    acceptabel: false,
+    nodig: false,
+    gewenst: false,
+    energiek: false
   },
   startpunt: 5,
   startpuntVragen: {
@@ -313,67 +313,8 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
       case 3:
         return (
           <div>
-            <div className="hero-icon">✅</div>
-            <h2 className="step-title">Stap 3: BANGE-check</h2>
-            
-            <div className="info-box yellow">
-              <h3>🎯 Wat is de BANGE-check?</h3>
-              <p className="text-gray-700">
-                De BANGE-check helpt je te bepalen of je leerdoel de juiste motivatie heeft. 
-                Hoe meer vakjes je kunt aanvinken, hoe groter de kans op succes.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {[
-                { key: 'bewust', label: 'Belangrijk', description: 'Ben je je bewust van waarom dit leerdoel belangrijk is voor jou?' },
-                { key: 'acceptabel', label: 'Authentiek', description: 'Past het bij de ontwikkeling die je door wil maken?' },
-                { key: 'nodig', label: 'Nuttig', description: 'Vinden mensen in je omgeving het nuttig dat je hieraan werkt?' },
-                { key: 'gewenst', label: 'Geloofwaardig', description: 'Denk je dat je dat je hier aan kunt werken?' },
-                { key: 'energiek', label: 'Enthousiasmerend', description: 'Word je enthousiast als je erover nadenkt dat je je hierin gaat ontwikkelen?' }
-              ].map(({ key, label, description }) => (
-                <div key={key} className="checkbox-group">
-                  <input
-                    type="checkbox"
-                    id={key}
-                    className="checkbox mt-1"
-                    checked={formData.bangeCheck[key as keyof typeof formData.bangeCheck]}
-                    onChange={(e) => updateFormData({
-                      bangeCheck: { ...formData.bangeCheck, [key]: e.target.checked }
-                    })}
-                  />
-                  <div>
-                    <label htmlFor={key} className="checkbox-label">{label}</label>
-                    <p className="checkbox-description text-sm">{description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="card mt-6">
-              <h4 className="font-medium text-gray-800 mb-2">Jouw BANGE-score:</h4>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-purple-600">
-                  {Object.values(formData.bangeCheck).filter(Boolean).length}/5
-                </span>
-                <span className="text-gray-600">
-                  {Object.values(formData.bangeCheck).filter(Boolean).length >= 4 
-                    ? '🎉 Uitstekende motivatie!' 
-                    : Object.values(formData.bangeCheck).filter(Boolean).length >= 3
-                    ? '👍 Goede motivatie'
-                    : '⚠️ Overweeg je motivatie nog eens'
-                  }
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-
-      case 4:
-        return (
-          <div>
             <div className="hero-icon">🎯</div>
-            <h2 className="step-title">Stap 4: SMART leerdoel formuleren</h2>
+            <h2 className="step-title">Stap 3: SMART leerdoel formuleren</h2>
             
             <div className="info-box purple">
               <h3>📝 SMART criteria</h3>
@@ -462,6 +403,65 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                   })}
                   placeholder="Bijvoorbeeld: Binnen 8 weken, voor het einde van dit semester..."
                 />
+              </div>
+            </div>
+          </div>
+        )
+
+      case 4:
+        return (
+          <div>
+            <div className="hero-icon">✅</div>
+            <h2 className="step-title">Stap 4: BANGE-check</h2>
+            
+            <div className="info-box yellow">
+              <h3>🎯 Wat is de BANGE-check?</h3>
+              <p className="text-gray-700">
+                De BANGE-check helpt je te bepalen of je leerdoel de juiste motivatie heeft. 
+                Hoe meer vakjes je kunt aanvinken, hoe groter de kans op succes.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {[
+                { key: 'bewust', label: 'Belangrijk', description: 'Ben je je bewust van waarom dit leerdoel belangrijk is voor jou?' },
+                { key: 'acceptabel', label: 'Authentiek', description: 'Past het bij de ontwikkeling die je door wil maken?' },
+                { key: 'nodig', label: 'Nuttig', description: 'Vinden mensen in je omgeving het nuttig dat je hieraan werkt?' },
+                { key: 'gewenst', label: 'Geloofwaardig', description: 'Denk je dat je dat je hier aan kunt werken?' },
+                { key: 'energiek', label: 'Enthousiasmerend', description: 'Word je enthousiast als je erover nadenkt dat je je hierin gaat ontwikkelen?' }
+              ].map(({ key, label, description }) => (
+                <div key={key} className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id={key}
+                    className="checkbox mt-1"
+                    checked={formData.bangeCheck[key as keyof typeof formData.bangeCheck]}
+                    onChange={(e) => updateFormData({
+                      bangeCheck: { ...formData.bangeCheck, [key]: e.target.checked }
+                    })}
+                  />
+                  <div>
+                    <label htmlFor={key} className="checkbox-label">{label}</label>
+                    <p className="checkbox-description text-sm">{description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="card mt-6">
+              <h4 className="font-medium text-gray-800 mb-2">Jouw BANGE-score:</h4>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-purple-600">
+                  {Object.values(formData.bangeCheck).filter(Boolean).length}/5
+                </span>
+                <span className="text-gray-600">
+                  {Object.values(formData.bangeCheck).filter(Boolean).length >= 4 
+                    ? '🎉 Uitstekende motivatie!' 
+                    : Object.values(formData.bangeCheck).filter(Boolean).length >= 3
+                    ? '👍 Goede motivatie'
+                    : '⚠️ Overweeg je motivatie nog eens'
+                  }
+                </span>
               </div>
             </div>
           </div>
