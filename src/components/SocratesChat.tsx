@@ -28,7 +28,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
     const initialMessages = {
       1: 'Welkom, jonge student! Ik ben Socrates. Laten we samen je grootste uitdaging onderzoeken met behulp van het 6G-model. Dit helpt ons de situatie grondig te begrijpen. Kun je me een specifieke situatie beschrijven waarin je deze uitdaging recent hebt ervaren?',
       2: 'Uitstekend! Nu we je uitdaging kennen, gaan we dieper graven met het kernkwadrant van Ofman. Dit helpt je je sterke punten én je valkuilen te begrijpen. Laten we beginnen: welke sterke eigenschap van jezelf herken je in de uitdagende situatie die je beschreef?',
-      3: 'Nu gaan we je leerdoel SMART maken. Denk eens na: als je over een paar maanden terugkijkt, wat zou je dan graag bereikt willen hebben? Wees zo specifiek mogelijk.',
+      3: 'Nu gaan we je leerdoel SMART maken - dat betekent Specifiek, Meetbaar, Acceptabel, Realistisch en Tijdgebonden. Laten we beginnen met het specifiek maken van je doel. Wat wil je precies leren of bereiken?',
       4: 'Laten we je motivatie onderzoeken. Waarom is dit leerdoel belangrijk voor jou? Wat drijft je om hieraan te werken?',
       5: 'Tijd voor zelfreflectie. Als je je huidige vaardigheden op een schaal van 0-10 zou zetten, waar zou je jezelf plaatsen? En waarom niet lager of hoger?',
       6: 'Nu wordt het praktisch! Welke concrete stappen kun je vandaag al zetten om dichter bij je doel te komen? Denk aan kleine, haalbare acties.',
@@ -161,8 +161,8 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
         description: 'Socrates begeleidt je door het kernkwadrant van Ofman om je sterke punten, valkuilen, uitdagingen en allergieën te herkennen.' 
       },
       3: { 
-        title: 'Formuleer SMART doelen', 
-        description: 'Beschrijf wat je wilt bereiken. Socrates stelt vragen om je doel specifiek, meetbaar en haalbaar te maken.' 
+        title: 'Formuleer een SMART leerdoel', 
+        description: 'Socrates stelt gerichte vragen om je doel Specifiek, Meetbaar, Acceptabel, Realistisch en Tijdgebonden te maken.' 
       },
       4: { 
         title: 'Onderzoek je motivatie', 
@@ -234,8 +234,54 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
     }))
   }
 
+  // SMART Progress Tracker for Step 3
+  const getSMARTProgress = () => {
+    if (stepNumber !== 3) return null
+
+    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
+    
+    const smartElements = [
+      { 
+        name: 'Specifiek', 
+        keywords: ['specifiek', 'precies', 'concreet', 'exact', 'duidelijk', 'wat wil je'], 
+        icon: '🎯',
+        description: 'Wat precies?'
+      },
+      { 
+        name: 'Meetbaar', 
+        keywords: ['meten', 'meetbaar', 'cijfer', 'percentage', 'resultaat', 'hoe weet je'], 
+        icon: '📊',
+        description: 'Hoe meet je het?'
+      },
+      { 
+        name: 'Acceptabel', 
+        keywords: ['belangrijk', 'waarom', 'motivatie', 'waarden', 'acceptabel', 'drijft'], 
+        icon: '💝',
+        description: 'Waarom belangrijk?'
+      },
+      { 
+        name: 'Realistisch', 
+        keywords: ['haalbaar', 'realistisch', 'mogelijk', 'middelen', 'kan je', 'uitdagend'], 
+        icon: '⚖️',
+        description: 'Is het haalbaar?'
+      },
+      { 
+        name: 'Tijdgebonden', 
+        keywords: ['wanneer', 'tijdlijn', 'deadline', 'datum', 'periode', 'tijd'], 
+        icon: '⏰',
+        description: 'Wanneer klaar?'
+      }
+    ]
+
+    return smartElements.map(element => ({
+      ...element,
+      covered: element.keywords.some(keyword => conversationText.includes(keyword))
+    }))
+  }
+
   const gProgress = get6GProgress()
   const kernkwadrantProgress = getKernkwadrantProgress()
+  const smartProgress = getSMARTProgress()
 
   if (!isExpanded) {
     return (
@@ -314,6 +360,38 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 Ontdek je sterke punten, valkuilen en ontwikkelpunten
+              </p>
+            </div>
+          )}
+
+          {/* SMART Preview for Step 3 */}
+          {stepNumber === 3 && (
+            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2">SMART-criteria voor effectieve doelen:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <span>🎯</span>
+                  <span className="text-gray-600"><strong>S</strong>pecifiek - Wat precies?</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>📊</span>
+                  <span className="text-gray-600"><strong>M</strong>eetbaar - Hoe meet je het?</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>💝</span>
+                  <span className="text-gray-600"><strong>A</strong>cceptabel - Waarom belangrijk?</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>⚖️</span>
+                  <span className="text-gray-600"><strong>R</strong>ealistisch - Is het haalbaar?</span>
+                </div>
+                <div className="flex items-center gap-1 md:col-span-2">
+                  <span>⏰</span>
+                  <span className="text-gray-600"><strong>T</strong>ijdgebonden - Wanneer klaar?</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Socrates begeleidt je stap voor stap door elk criterium
               </p>
             </div>
           )}
@@ -438,6 +516,35 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                     <span className="text-lg mb-1">{k.icon}</span>
                     <span className="font-medium">{k.name}</span>
                     {k.covered && <span className="text-green-200 text-xs">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SMART Progress Tracker for Step 3 */}
+          {stepNumber === 3 && smartProgress && (
+            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">SMART-criteria voortgang:</span>
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  {smartProgress.filter(s => s.covered).length}/5
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {smartProgress.map((s, index) => (
+                  <div
+                    key={index}
+                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
+                      s.covered 
+                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
+                        : 'bg-white bg-opacity-10 text-white opacity-60'
+                    }`}
+                  >
+                    <span className="text-lg mb-1">{s.icon}</span>
+                    <span className="font-bold">{s.name.charAt(0)}</span>
+                    <span className="font-medium text-center">{s.name}</span>
+                    {s.covered && <span className="text-green-200 text-xs">✓</span>}
                   </div>
                 ))}
               </div>
@@ -636,6 +743,74 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                     <div className="p-2 bg-red-50 rounded-lg border border-red-200">
                       <p className="text-xs text-red-700">
                         🚫 <strong>Focus nu op:</strong> Welk gedrag van anderen irriteert je het meest?
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SMART Quick Reference for Step 3 */}
+          {stepNumber === 3 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="text-xs text-gray-600 mb-2">
+                <strong>SMART-criteria hulp:</strong> Maak je doel specifiek, meetbaar, acceptabel, realistisch en tijdgebonden
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
+                {smartProgress?.map((s, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
+                      s.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
+                    }`}
+                  >
+                    <span>{s.icon}</span>
+                    <span><strong>{s.name.charAt(0)}</strong> - {s.description}</span>
+                    {s.covered && <span className="text-green-500">✓</span>}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Helpful hints for current SMART focus */}
+              {stepNumber === 3 && smartProgress && (
+                <div className="mt-2 space-y-1">
+                  {!smartProgress.find(s => s.name === 'Specifiek')?.covered && (
+                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-700">
+                        🎯 <strong>Focus nu op Specifiek:</strong> Wat wil je precies leren of bereiken? Geef een concreet voorbeeld.
+                      </p>
+                    </div>
+                  )}
+                  {smartProgress.find(s => s.name === 'Specifiek')?.covered && 
+                   !smartProgress.find(s => s.name === 'Meetbaar')?.covered && (
+                    <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-700">
+                        📊 <strong>Focus nu op Meetbaar:</strong> Hoe ga je meten of je dit bereikt? Wat zou een duidelijk teken van succes zijn?
+                      </p>
+                    </div>
+                  )}
+                  {smartProgress.find(s => s.name === 'Meetbaar')?.covered && 
+                   !smartProgress.find(s => s.name === 'Acceptabel')?.covered && (
+                    <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
+                      <p className="text-xs text-purple-700">
+                        💝 <strong>Focus nu op Acceptabel:</strong> Waarom is dit doel belangrijk voor jou? Wat motiveert je?
+                      </p>
+                    </div>
+                  )}
+                  {smartProgress.find(s => s.name === 'Acceptabel')?.covered && 
+                   !smartProgress.find(s => s.name === 'Realistisch')?.covered && (
+                    <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <p className="text-xs text-yellow-700">
+                        ⚖️ <strong>Focus nu op Realistisch:</strong> Is dit haalbaar voor jou? Welke middelen heb je nodig?
+                      </p>
+                    </div>
+                  )}
+                  {smartProgress.find(s => s.name === 'Realistisch')?.covered && 
+                   !smartProgress.find(s => s.name === 'Tijdgebonden')?.covered && (
+                    <div className="p-2 bg-orange-50 rounded-lg border border-orange-200">
+                      <p className="text-xs text-orange-700">
+                        ⏰ <strong>Focus nu op Tijdgebonden:</strong> Wanneer wil je dit bereikt hebben? Wat is een realistische tijdlijn?
                       </p>
                     </div>
                   )}
