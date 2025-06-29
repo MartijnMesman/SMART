@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import DownloadButton from './DownloadButton'
+import SocratesChat from './SocratesChat'
 
 interface SmartLeerdoelWizardProps {
   onBack: () => void
@@ -19,7 +20,7 @@ interface FormData {
   // Stap 2: Kernkwaliteiten
   kernkwaliteiten: string[]
   
-  // Stap 3: SMART leerdoel (was stap 4)
+  // Stap 3: SMART leerdoel
   smartLeerdoel: {
     specifiek: string
     meetbaar: string
@@ -28,7 +29,7 @@ interface FormData {
     tijdgebonden: string
   }
   
-  // Stap 4: BANGE check (was stap 3)
+  // Stap 4: BANGE check
   bangeCheck: {
     bewust: boolean
     acceptabel: boolean
@@ -176,6 +177,19 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
     }
   }
 
+  const handleSocratesInsight = (insight: string) => {
+    // Extract potential challenges from the conversation
+    const challenges = insight.split(/[.!?]+/).filter(s => s.trim().length > 10)
+    if (challenges.length > 0) {
+      const newChallenge = challenges[challenges.length - 1].trim()
+      if (newChallenge && !formData.uitdagingen.includes(newChallenge)) {
+        updateFormData({
+          uitdagingen: [...formData.uitdagingen, newChallenge]
+        })
+      }
+    }
+  }
+
   const renderProgressBar = () => (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
@@ -206,6 +220,9 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                 Dit vormt de basis voor een effectief leerdoel.
               </p>
             </div>
+
+            {/* Socrates Chat Component */}
+            <SocratesChat onInsightGained={handleSocratesInsight} />
 
             <div className="form-group">
               <label className="form-label">
@@ -265,7 +282,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Kernkwadrant afbeelding - NIEUWE AFBEELDING */}
+            {/* Kernkwadrant afbeelding */}
             <div className="my-6 flex justify-center">
               <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
                 <img 
