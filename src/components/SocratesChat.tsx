@@ -27,7 +27,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   const getInitialMessage = (step: number) => {
     const initialMessages = {
       1: 'Welkom, jonge student! Ik ben Socrates. Laten we samen je grootste uitdaging onderzoeken met behulp van het 6G-model. Dit helpt ons de situatie grondig te begrijpen. Kun je me een specifieke situatie beschrijven waarin je deze uitdaging recent hebt ervaren?',
-      2: 'Uitstekend! Nu we je uitdagingen kennen, laten we kijken naar je sterke punten. Vertel me eens over een moment waarop je trots was op jezelf in je studie. Wat deed je toen goed?',
+      2: 'Uitstekend! Nu we je uitdaging kennen, gaan we dieper graven met het kernkwadrant van Ofman. Dit helpt je je sterke punten én je valkuilen te begrijpen. Laten we beginnen: welke sterke eigenschap van jezelf herken je in de uitdagende situatie die je beschreef?',
       3: 'Nu gaan we je leerdoel SMART maken. Denk eens na: als je over een paar maanden terugkijkt, wat zou je dan graag bereikt willen hebben? Wees zo specifiek mogelijk.',
       4: 'Laten we je motivatie onderzoeken. Waarom is dit leerdoel belangrijk voor jou? Wat drijft je om hieraan te werken?',
       5: 'Tijd voor zelfreflectie. Als je je huidige vaardigheden op een schaal van 0-10 zou zetten, waar zou je jezelf plaatsen? En waarom niet lager of hoger?',
@@ -157,8 +157,8 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
         description: 'Socrates helpt je door gerichte vragen je uitdaging grondig te analyseren: Gebeurtenis, Gevoel, Gedachten, Gedrag, Gevolgen en Gewenst resultaat.' 
       },
       2: { 
-        title: 'Herken je kwaliteiten', 
-        description: 'Deel momenten waarop je succesvol was. Socrates helpt je je sterke punten en talenten herkennen.' 
+        title: 'Ontdek je kernkwaliteiten met het kernkwadrant', 
+        description: 'Socrates begeleidt je door het kernkwadrant van Ofman om je sterke punten, valkuilen, uitdagingen en allergieën te herkennen.' 
       },
       3: { 
         title: 'Formuleer SMART doelen', 
@@ -215,7 +215,27 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
     }))
   }
 
+  // Kernkwadrant Progress Tracker for Step 2
+  const getKernkwadrantProgress = () => {
+    if (stepNumber !== 2) return null
+
+    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
+    
+    const kwadrantElements = [
+      { name: 'Kernkwaliteit', keywords: ['kwaliteit', 'sterk', 'goed', 'talent', 'eigenschap', 'kan'], icon: '💎' },
+      { name: 'Valkuil', keywords: ['doorschiet', 'teveel', 'overdrijf', 'valkuil', 'te veel', 'doorslaat'], icon: '⚠️' },
+      { name: 'Uitdaging', keywords: ['ontwikkelen', 'leren', 'uitdaging', 'balans', 'tegenovergestelde'], icon: '🎯' },
+      { name: 'Allergie', keywords: ['irriteert', 'ergert', 'haat', 'allergie', 'kan niet tegen', 'stoort'], icon: '🚫' }
+    ]
+
+    return kwadrantElements.map(element => ({
+      ...element,
+      covered: element.keywords.some(keyword => conversationText.includes(keyword))
+    }))
+  }
+
   const gProgress = get6GProgress()
+  const kernkwadrantProgress = getKernkwadrantProgress()
 
   if (!isExpanded) {
     return (
@@ -267,6 +287,34 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   <span className="text-gray-600">Gewenst</span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Kernkwadrant Preview for Step 2 */}
+          {stepNumber === 2 && (
+            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2">Kernkwadrant van Ofman:</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <span>💎</span>
+                  <span className="text-gray-600">Kernkwaliteit</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>⚠️</span>
+                  <span className="text-gray-600">Valkuil</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🎯</span>
+                  <span className="text-gray-600">Uitdaging</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🚫</span>
+                  <span className="text-gray-600">Allergie</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Ontdek je sterke punten, valkuilen en ontwikkelpunten
+              </p>
             </div>
           )}
           
@@ -362,6 +410,34 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                     <span className="text-lg mb-1">{g.icon}</span>
                     <span className="font-medium">{g.name}</span>
                     {g.covered && <span className="text-green-200 text-xs">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Kernkwadrant Progress Tracker for Step 2 */}
+          {stepNumber === 2 && kernkwadrantProgress && (
+            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">Kernkwadrant voortgang:</span>
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  {kernkwadrantProgress.filter(k => k.covered).length}/4
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {kernkwadrantProgress.map((k, index) => (
+                  <div
+                    key={index}
+                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
+                      k.covered 
+                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
+                        : 'bg-white bg-opacity-10 text-white opacity-60'
+                    }`}
+                  >
+                    <span className="text-lg mb-1">{k.icon}</span>
+                    <span className="font-medium">{k.name}</span>
+                    {k.covered && <span className="text-green-200 text-xs">✓</span>}
                   </div>
                 ))}
               </div>
@@ -503,6 +579,66 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   <p className="text-xs text-blue-700">
                     💡 <strong>Tip voor Gevoel:</strong> Beschrijf je emoties zoals boos, gefrustreerd, verdrietig, zenuwachtig, teleurgesteld, etc.
                   </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Kernkwadrant Quick Reference for Step 2 */}
+          {stepNumber === 2 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="text-xs text-gray-600 mb-2">
+                <strong>Kernkwadrant hulp:</strong> Ontdek je sterke punten en ontwikkelpunten
+              </div>
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                {kernkwadrantProgress?.map((k, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
+                      k.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
+                    }`}
+                  >
+                    <span>{k.icon}</span>
+                    <span>{k.name}</span>
+                    {k.covered && <span className="text-green-500">✓</span>}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Helpful hints for current focus */}
+              {stepNumber === 2 && kernkwadrantProgress && (
+                <div className="mt-2 space-y-1">
+                  {!kernkwadrantProgress.find(k => k.name === 'Kernkwaliteit')?.covered && (
+                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-700">
+                        💎 <strong>Focus nu op:</strong> Welke sterke eigenschap van jezelf zie je in de uitdagende situatie?
+                      </p>
+                    </div>
+                  )}
+                  {kernkwadrantProgress.find(k => k.name === 'Kernkwaliteit')?.covered && 
+                   !kernkwadrantProgress.find(k => k.name === 'Valkuil')?.covered && (
+                    <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <p className="text-xs text-yellow-700">
+                        ⚠️ <strong>Focus nu op:</strong> Wanneer slaat deze kwaliteit door? Wat gebeurt er als je te veel van het goede doet?
+                      </p>
+                    </div>
+                  )}
+                  {kernkwadrantProgress.find(k => k.name === 'Valkuil')?.covered && 
+                   !kernkwadrantProgress.find(k => k.name === 'Uitdaging')?.covered && (
+                    <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-xs text-green-700">
+                        🎯 <strong>Focus nu op:</strong> Wat zou je willen ontwikkelen om meer in balans te komen?
+                      </p>
+                    </div>
+                  )}
+                  {kernkwadrantProgress.find(k => k.name === 'Uitdaging')?.covered && 
+                   !kernkwadrantProgress.find(k => k.name === 'Allergie')?.covered && (
+                    <div className="p-2 bg-red-50 rounded-lg border border-red-200">
+                      <p className="text-xs text-red-700">
+                        🚫 <strong>Focus nu op:</strong> Welk gedrag van anderen irriteert je het meest?
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
