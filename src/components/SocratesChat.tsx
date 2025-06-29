@@ -152,15 +152,42 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   // Step-specific titles and descriptions
   const getStepInfo = (step: number) => {
     const stepInfo = {
-      1: { title: 'Ontdek je uitdagingen', description: 'Socrates helpt je je grootste leerpunten identificeren' },
-      2: { title: 'Herken je kwaliteiten', description: 'Ontdek je sterke punten en talenten' },
-      3: { title: 'Formuleer SMART doelen', description: 'Maak je leerdoel specifiek en haalbaar' },
-      4: { title: 'Onderzoek je motivatie', description: 'Begrijp waarom dit doel belangrijk is' },
-      5: { title: 'Bepaal je startpunt', description: 'Schaal je huidige niveau realistisch in' },
-      6: { title: 'Plan concrete acties', description: 'Bedenk uitvoerbare stappen' },
-      7: { title: 'Anticipeer obstakels', description: 'Bereid je voor op uitdagingen' },
-      8: { title: 'Maak een planning', description: 'Structureer je leerproces' },
-      9: { title: 'Stel reflectie in', description: 'Plan je evaluatie en bijsturing' }
+      1: { 
+        title: 'Ontdek je uitdagingen', 
+        description: 'Vertel Socrates over situaties waarin je vastloopt of moeite hebt. Hij helpt je de kern van je uitdagingen te begrijpen.' 
+      },
+      2: { 
+        title: 'Herken je kwaliteiten', 
+        description: 'Deel momenten waarop je succesvol was. Socrates helpt je je sterke punten en talenten herkennen.' 
+      },
+      3: { 
+        title: 'Formuleer SMART doelen', 
+        description: 'Beschrijf wat je wilt bereiken. Socrates stelt vragen om je doel specifiek, meetbaar en haalbaar te maken.' 
+      },
+      4: { 
+        title: 'Onderzoek je motivatie', 
+        description: 'Verken waarom dit doel belangrijk is. Socrates helpt je je drijfveren en motivatie te begrijpen.' 
+      },
+      5: { 
+        title: 'Bepaal je startpunt', 
+        description: 'Reflecteer op je huidige niveau. Socrates helpt je realistisch inschatten waar je nu staat.' 
+      },
+      6: { 
+        title: 'Plan concrete acties', 
+        description: 'Brainstorm over praktische stappen. Socrates helpt je van ideeën naar uitvoerbare acties te komen.' 
+      },
+      7: { 
+        title: 'Anticipeer obstakels', 
+        description: 'Denk na over mogelijke uitdagingen. Socrates helpt je obstakels voorzien en oplossingen bedenken.' 
+      },
+      8: { 
+        title: 'Maak een planning', 
+        description: 'Organiseer je leerproces. Socrates helpt je structuur aanbrengen in wanneer, waar en hoe je gaat werken.' 
+      },
+      9: { 
+        title: 'Stel reflectie in', 
+        description: 'Plan je evaluatie. Socrates helpt je bedenken hoe je je vooruitgang gaat meten en bijsturen.' 
+      }
     }
     return stepInfo[step as keyof typeof stepInfo] || stepInfo[1]
   }
@@ -187,8 +214,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
             </div>
           </div>
           <p className="text-gray-700 text-sm mb-4">
-            Socrates helpt je door gerichte vragen te stellen om dieper na te denken over deze stap. 
-            Zijn wijsheid kan je helpen tot nieuwe inzichten te komen.
+            {stepInfo.description}
           </p>
           <button
             onClick={() => setIsExpanded(true)}
