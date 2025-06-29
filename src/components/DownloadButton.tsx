@@ -89,11 +89,11 @@ export default function DownloadButton({ formData, className = '' }: DownloadBut
             spacing: { after: 600 }
           }),
 
-          // Stap 1: Uitdagingen
+          // Stap 1: Uitdaging (nu enkelvoud)
           new Paragraph({
             children: [
               new TextRun({
-                text: "STAP 1: BEWUST WORDEN VAN UITDAGINGEN",
+                text: "STAP 1: BEWUST WORDEN VAN MIJN GROOTSTE UITDAGING",
                 bold: true,
                 size: 24,
                 color: "7C3AED"
@@ -106,7 +106,7 @@ export default function DownloadButton({ formData, className = '' }: DownloadBut
           new Paragraph({
             children: [
               new TextRun({
-                text: "Mijn uitdagingen:",
+                text: "Mijn grootste uitdaging:",
                 bold: true,
                 size: 22
               })
@@ -114,15 +114,21 @@ export default function DownloadButton({ formData, className = '' }: DownloadBut
             spacing: { after: 120 }
           }),
 
-          ...formData.uitdagingen.map(uitdaging => 
-            new Paragraph({
-              children: [
-                new TextRun({ text: "• " }),
-                new TextRun({ text: uitdaging })
-              ],
-              spacing: { after: 80 },
-              indent: { left: 400 }
-            })
+          // Handle both single challenge and array format for backward compatibility
+          ...(formData.uitdagingen.length > 0 ? 
+            formData.uitdagingen.map(uitdaging => 
+              new Paragraph({
+                children: [new TextRun({ text: uitdaging })],
+                spacing: { after: 160 },
+                indent: { left: 400 }
+              })
+            ) : [
+              new Paragraph({
+                children: [new TextRun({ text: "Nog niet ingevuld", italics: true, color: "666666" })],
+                spacing: { after: 160 },
+                indent: { left: 400 }
+              })
+            ]
           ),
 
           // Stap 2: Kernkwaliteiten
@@ -674,12 +680,16 @@ export default function DownloadButton({ formData, className = '' }: DownloadBut
     addText(`Gegenereerd op: ${new Date().toLocaleDateString('nl-NL')}`, 10, false, '#666666')
     yPosition += 10
 
-    // Stap 1
-    addText('STAP 1: BEWUST WORDEN VAN UITDAGINGEN', 16, true, '#7C3AED')
-    addText('Mijn uitdagingen:', 12, true)
-    formData.uitdagingen.forEach(uitdaging => {
-      addText(`• ${uitdaging}`, 11)
-    })
+    // Stap 1 - Updated for single challenge
+    addText('STAP 1: BEWUST WORDEN VAN MIJN GROOTSTE UITDAGING', 16, true, '#7C3AED')
+    addText('Mijn grootste uitdaging:', 12, true)
+    if (formData.uitdagingen.length > 0) {
+      formData.uitdagingen.forEach(uitdaging => {
+        addText(uitdaging, 11)
+      })
+    } else {
+      addText('Nog niet ingevuld', 11, false, '#666666')
+    }
     yPosition += 5
 
     // Stap 2

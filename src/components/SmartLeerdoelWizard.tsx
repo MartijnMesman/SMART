@@ -14,13 +14,13 @@ interface ObstakelMetOverwinning {
 }
 
 interface FormData {
-  // Stap 1: Uitdagingen
-  uitdagingen: string[]
+  // Stap 1: Uitdaging (nu enkelvoud)
+  uitdaging: string
   
   // Stap 2: Kernkwaliteiten
   kernkwaliteiten: string[]
   
-  // Stap 3: SMART leerdoel
+  // Stap 3: SMART leerdoel (was stap 4)
   smartLeerdoel: {
     specifiek: string
     meetbaar: string
@@ -29,7 +29,7 @@ interface FormData {
     tijdgebonden: string
   }
   
-  // Stap 4: BANGE check
+  // Stap 4: BANGE check (was stap 3)
   bangeCheck: {
     bewust: boolean
     acceptabel: boolean
@@ -69,7 +69,7 @@ interface FormData {
 }
 
 const initialFormData: FormData = {
-  uitdagingen: [],
+  uitdaging: '',
   kernkwaliteiten: [],
   smartLeerdoel: {
     specifiek: '',
@@ -177,64 +177,6 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
     }
   }
 
-  // Step-specific Socrates guidance
-  const getSocratesContext = (step: number) => {
-    const contexts = {
-      1: "Help de student hun grootste uitdaging in studie of persoonlijke ontwikkeling te ontdekken. Stel vragen over specifieke situaties waarin ze problemen ervaren.",
-      2: "Help de student hun kernkwaliteiten te herkennen die tegenover hun uitdagingen staan. Vraag naar momenten waarin ze succesvol waren.",
-      3: "Begeleid de student bij het formuleren van een SMART leerdoel. Help hen specifiek, meetbaar, acceptabel, realistisch en tijdgebonden te denken.",
-      4: "Help de student hun motivatie te onderzoeken door de BANGE-criteria door te nemen. Vraag waarom dit leerdoel belangrijk voor hen is.",
-      5: "Begeleid de student bij het bepalen van hun startpunt. Help hen realistisch hun huidige niveau in te schatten.",
-      6: "Help de student concrete, uitvoerbare acties te bedenken. Vraag naar specifieke stappen die ze kunnen nemen.",
-      7: "Begeleid de student bij het anticiperen op obstakels. Help hen mogelijke uitdagingen en oplossingen te bedenken.",
-      8: "Help de student een concrete planning te maken. Vraag naar wanneer, waar en hoe ze gaan werken aan hun leerdoel.",
-      9: "Begeleid de student bij het opzetten van reflectie en evaluatie. Help hen succesindicatoren te identificeren."
-    }
-    return contexts[step as keyof typeof contexts] || contexts[1]
-  }
-
-  const handleSocratesInsight = (insight: string, step: number) => {
-    // Process insights based on current step
-    switch (step) {
-      case 1:
-        // Extract challenges
-        const challenges = insight.split(/[.!?]+/).filter(s => s.trim().length > 10)
-        if (challenges.length > 0) {
-          const newChallenge = challenges[challenges.length - 1].trim()
-          if (newChallenge && !formData.uitdagingen.includes(newChallenge)) {
-            updateFormData({
-              uitdagingen: [...formData.uitdagingen, newChallenge]
-            })
-          }
-        }
-        break
-      case 2:
-        // Extract qualities
-        const qualities = insight.split(/[.!?]+/).filter(s => s.trim().length > 5)
-        if (qualities.length > 0) {
-          const newQuality = qualities[qualities.length - 1].trim()
-          if (newQuality && !formData.kernkwaliteiten.includes(newQuality)) {
-            updateFormData({
-              kernkwaliteiten: [...formData.kernkwaliteiten, newQuality]
-            })
-          }
-        }
-        break
-      case 6:
-        // Extract actions
-        const actions = insight.split(/[.!?]+/).filter(s => s.trim().length > 10)
-        if (actions.length > 0) {
-          const newAction = actions[actions.length - 1].trim()
-          if (newAction && !formData.acties.includes(newAction)) {
-            updateFormData({
-              acties: [...formData.acties, newAction]
-            })
-          }
-        }
-        break
-    }
-  }
-
   const renderProgressBar = () => (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
@@ -256,62 +198,56 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
         return (
           <div>
             <div className="hero-icon">🤔</div>
-            <h2 className="step-title">Stap 1: Bewust worden van uitdagingen</h2>
+            <h2 className="step-title">Stap 1: Bewust worden van je grootste uitdaging</h2>
             
             <div className="info-box blue">
               <h3>💡 Waarom deze stap?</h3>
               <p className="text-gray-700">
-                Door je uitdagingen bewust te maken, krijg je inzicht in waar je wilt groeien. 
-                Dit vormt de basis voor een effectief leerdoel.
+                Door je grootste uitdaging bewust te maken, krijg je inzicht in waar je het meest wilt groeien. 
+                Focus op één specifieke uitdaging om diepgaand aan te kunnen werken.
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 1)}
-              stepContext={getSocratesContext(1)}
               stepNumber={1}
+              stepContext="Uitdagingen identificeren"
+              onInsightGained={(insight) => {
+                // Optionally pre-fill the challenge field with insights from Socrates
+                if (!formData.uitdaging && insight.length > 20) {
+                  updateFormData({ uitdaging: insight.substring(0, 200) + '...' })
+                }
+              }}
             />
 
             <div className="form-group">
               <label className="form-label">
                 Wat is de grootste uitdaging die je momenteel in je studie of persoonlijke ontwikkeling ervaart?
               </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  className="form-input"
-                  value={tempInput}
-                  onChange={(e) => setTempInput(e.target.value)}
-                  placeholder="Bijvoorbeeld: Ik vind het lastig om...bv. tijdsmanagement, presenteren, concentreren, samenwerken"
-                  onKeyPress={(e) => e.key === 'Enter' && addToArray('uitdagingen', tempInput)}
-                />
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => addToArray('uitdagingen', tempInput)}
-                >
-                  Toevoegen
-                </button>
-              </div>
+              <textarea
+                className="form-textarea"
+                rows={4}
+                value={formData.uitdaging}
+                onChange={(e) => updateFormData({ uitdaging: e.target.value })}
+                placeholder="Bijvoorbeeld: Ik vind het lastig om mijn tijd goed in te delen tijdens drukke periodes. Ik raak vaak gestrest en verlies het overzicht over mijn taken..."
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                💡 Tip: Wees zo specifiek mogelijk. Beschrijf niet alleen wat je moeilijk vindt, maar ook wanneer en waarom dit gebeurt.
+              </p>
             </div>
 
-            {formData.uitdagingen.length > 0 && (
+            {formData.uitdaging.trim() && (
               <div className="card">
-                <h4 className="font-medium text-gray-800 mb-3">Jouw uitdagingen:</h4>
-                <div className="space-y-2">
-                  {formData.uitdagingen.map((uitdaging, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                      <span className="text-gray-700">{uitdaging}</span>
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => removeFromArray('uitdagingen', index)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                <h4 className="font-medium text-gray-800 mb-3">Jouw uitdaging:</h4>
+                <div className="bg-white p-3 rounded border border-blue-200">
+                  <p className="text-gray-700">{formData.uitdaging}</p>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <span className="text-green-600">✓</span>
+                  <span className="text-gray-600">
+                    Uitstekend! Je hebt je grootste uitdaging geïdentificeerd. 
+                    {formData.uitdaging.length > 100 ? ' Je beschrijving is mooi uitgebreid.' : ' Probeer eventueel nog wat meer detail toe te voegen.'}
+                  </span>
                 </div>
               </div>
             )}
@@ -331,11 +267,24 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Toon de uitdaging uit stap 1 */}
+            {formData.uitdaging && (
+              <div className="card mb-6">
+                <h4 className="font-medium text-gray-800 mb-3">Jouw uitdaging uit stap 1:</h4>
+                <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                  <p className="text-blue-800">{formData.uitdaging}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 2)}
-              stepContext={getSocratesContext(2)}
               stepNumber={2}
+              stepContext="Kernkwaliteiten herkennen"
+              onInsightGained={(insight) => {
+                // Optionally help identify qualities from the conversation
+                console.log('Socrates insight for qualities:', insight)
+              }}
             />
 
             {/* Kernkwadrant afbeelding */}
@@ -412,11 +361,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 3)}
-              stepContext={getSocratesContext(3)}
               stepNumber={3}
+              stepContext="SMART leerdoel formuleren"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for SMART goal:', insight)
+              }}
             />
 
             <div className="space-y-4">
@@ -517,11 +468,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 4)}
-              stepContext={getSocratesContext(4)}
               stepNumber={4}
+              stepContext="Motivatie onderzoeken"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for motivation:', insight)
+              }}
             />
 
             <div className="space-y-4">
@@ -583,11 +536,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 5)}
-              stepContext={getSocratesContext(5)}
               stepNumber={5}
+              stepContext="Startpunt bepalen"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for starting point:', insight)
+              }}
             />
 
             <div className="form-group">
@@ -714,11 +669,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 6)}
-              stepContext={getSocratesContext(6)}
               stepNumber={6}
+              stepContext="Concrete acties plannen"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for actions:', insight)
+              }}
             />
 
             <div className="form-group">
@@ -779,11 +736,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 7)}
-              stepContext={getSocratesContext(7)}
               stepNumber={7}
+              stepContext="Obstakels anticiperen"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for obstacles:', insight)
+              }}
             />
 
             {/* Toon acties uit stap 6 */}
@@ -933,11 +892,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 8)}
-              stepContext={getSocratesContext(8)}
               stepNumber={8}
+              stepContext="Planning maken"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for planning:', insight)
+              }}
             />
 
             <div className="space-y-4">
@@ -1051,11 +1012,13 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               </p>
             </div>
 
-            {/* Socrates Chat Component */}
+            {/* Socrates Chat Integration */}
             <SocratesChat 
-              onInsightGained={(insight) => handleSocratesInsight(insight, 9)}
-              stepContext={getSocratesContext(9)}
               stepNumber={9}
+              stepContext="Reflectie instellen"
+              onInsightGained={(insight) => {
+                console.log('Socrates insight for reflection:', insight)
+              }}
             />
 
             <div className="space-y-4">
@@ -1170,7 +1133,10 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                 <p className="text-gray-600 text-sm mb-4">
                   Download je complete leerdoel plan als Word document of PDF om te bewaren, printen of te delen.
                 </p>
-                <DownloadButton formData={formData} />
+                <DownloadButton formData={{
+                  ...formData,
+                  uitdagingen: formData.uitdaging ? [formData.uitdaging] : [] // Convert single challenge to array for download
+                }} />
               </div>
             </div>
           </div>
@@ -1198,15 +1164,18 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900">SMART Leerdoel Creator</h1>
-              <p className="text-sm text-pink-600 font-medium">9-stappen methode met Socrates</p>
+              <p className="text-sm text-pink-600 font-medium">9-stappen methode</p>
             </div>
           </div>
           
           {/* Download button in header - alleen tonen als er data is */}
-          {(formData.uitdagingen.length > 0 || formData.kernkwaliteiten.length > 0 || 
+          {(formData.uitdaging.trim() !== '' || formData.kernkwaliteiten.length > 0 || 
             Object.values(formData.smartLeerdoel).some(v => v.trim() !== '')) && (
             <div className="hidden md:block">
-              <DownloadButton formData={formData} className="scale-90" />
+              <DownloadButton formData={{
+                ...formData,
+                uitdagingen: formData.uitdaging ? [formData.uitdaging] : [] // Convert for download
+              }} className="scale-90" />
             </div>
           )}
         </div>
