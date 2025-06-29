@@ -202,7 +202,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
     
     const gElements = [
       { name: 'Gebeurtenis', keywords: ['gebeurde', 'situatie', 'moment', 'toen', 'vooraf'], icon: '📅' },
-      { name: 'Gevoel', keywords: ['voelde', 'emotie', 'gevoel', 'lichaam', 'stress', 'zenuw'], icon: '💭' },
+      { name: 'Gevoel', keywords: ['voelde', 'emotie', 'gevoel', 'boos', 'gefrustreerd', 'verdrietig', 'zenuwachtig', 'stress'], icon: '💭' },
       { name: 'Gedachten', keywords: ['dacht', 'gedachte', 'hoofd', 'tegen jezelf', 'overtuiging'], icon: '🧠' },
       { name: 'Gedrag', keywords: ['deed', 'reageerde', 'actie', 'gedrag', 'handelde'], icon: '🎭' },
       { name: 'Gevolgen', keywords: ['gevolg', 'resultaat', 'daarna', 'effect', 'uitkomst'], icon: '📊' },
@@ -496,6 +496,15 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   </div>
                 ))}
               </div>
+              
+              {/* Helpful hint for Gevoel specifically */}
+              {stepNumber === 1 && !gProgress?.find(g => g.name === 'Gevoel')?.covered && (
+                <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    💡 <strong>Tip voor Gevoel:</strong> Beschrijf je emoties zoals boos, gefrustreerd, verdrietig, zenuwachtig, teleurgesteld, etc.
+                  </p>
+                </div>
+              )}
             </div>
           )}
           

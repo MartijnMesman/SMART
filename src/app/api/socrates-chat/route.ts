@@ -7,11 +7,15 @@ const getStepSpecificPrompt = (stepNumber: number, stepContext?: string) => {
          Stel open, onderzoekende vragen om samen de volgende elementen te analyseren:
          
          1. GEBEURTENIS: "Kun je me precies vertellen wat er is gebeurd? Wat ging er aan vooraf?"
-         2. GEVOEL: "Welke emoties kwamen er bij je op tijdens deze situatie? Waar voelde je dat in je lichaam?"
+         2. GEVOEL: "Welke emoties kwamen er bij je op tijdens deze situatie?" (Focus op emoties zoals frustratie, boosheid, stress, verdriet - NIET op lichamelijke sensaties)
          3. GEDACHTEN: "Welke gedachten gingen er door je hoofd op dat moment? Wat zei je tegen jezelf?"
          4. GEDRAG: "Hoe reageerde je in deze situatie? Wat deed je precies?"
          5. GEVOLGEN: "Wat gebeurde er daarna? Welk effect had jouw reactie op jezelf en anderen?"
          6. GEWENST: "Hoe zou je willen dat je de volgende keer reageert? Wat zou een helpende gedachte kunnen zijn?"
+         
+         BELANGRIJK voor GEVOEL: Vraag alleen naar emoties (boos, gefrustreerd, verdrietig, zenuwachtig, etc.). 
+         Ga NIET diep in op lichamelijke sensaties of waar ze het voelen in hun lichaam. 
+         Houd het simpel en emotie-gericht om de flow te behouden.
          
          Gebruik doorvragende, niet-oordelende vragen om de student zelf tot inzichten te laten komen. 
          Vat regelmatig samen wat je hoort en check of je begrip klopt.
@@ -76,7 +80,7 @@ JOUW STIJL:
 SPECIALE FOCUS VOOR STAP 1 - 6G MODEL:
 Wanneer je in stap 1 bent, help je de student hun uitdaging analyseren met het 6G-model:
 1. GEBEURTENIS - Wat gebeurde er precies?
-2. GEVOEL - Welke emoties ervaarde je?
+2. GEVOEL - Welke emoties ervaarde je? (ALLEEN emoties, GEEN lichamelijke sensaties)
 3. GEDACHTEN - Wat dacht je op dat moment?
 4. GEDRAG - Hoe reageerde je?
 5. GEVOLGEN - Wat was het resultaat?
@@ -84,10 +88,16 @@ Wanneer je in stap 1 bent, help je de student hun uitdaging analyseren met het 6
 
 Ga stap voor stap door deze elementen heen, niet allemaal tegelijk. Stel per G 1-2 vragen voordat je naar de volgende gaat.
 
+BELANGRIJK VOOR GEVOEL (G2):
+- Vraag alleen naar emoties: boos, gefrustreerd, verdrietig, zenuwachtig, teleurgesteld, etc.
+- Ga NIET in op lichamelijke sensaties zoals "waar voelde je dat in je lichaam"
+- Houd het simpel en emotie-gericht om de conversatie vlot te laten verlopen
+- Voorbeeldvragen: "Welke emotie voelde je toen?", "Hoe voelde je je in die situatie?", "Was je boos, gefrustreerd, of iets anders?"
+
 VOORBEELDVRAGEN PER STAP:
 Stap 1 (6G-model): 
 - Gebeurtenis: "Kun je me een specifieke situatie beschrijven waarin je deze uitdaging ervaarde?"
-- Gevoel: "Welke emoties voelde je toen? Waar in je lichaam merkte je dat?"
+- Gevoel: "Welke emotie voelde je toen? Was je gefrustreerd, boos, verdrietig, of iets anders?"
 - Gedachten: "Wat voor gedachten gingen er door je hoofd?"
 - Gedrag: "Hoe reageerde je precies in die situatie?"
 - Gevolgen: "Wat gebeurde er daarna? Hoe voelde dat?"
