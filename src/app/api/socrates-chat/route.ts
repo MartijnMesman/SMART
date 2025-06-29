@@ -35,17 +35,28 @@ Houd je antwoorden kort (max 2-3 zinnen) en stel altijd een vervolgvraag.`
 export async function POST(request: NextRequest) {
   try {
     // Check if API key exists
-    if (!process.env.GEMINI_API_KEY) {
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
       console.error('GEMINI_API_KEY not found in environment variables')
       return NextResponse.json(
-        { error: 'Gemini API key niet geconfigureerd. Voeg GEMINI_API_KEY toe aan je .env.local bestand.' },
+        { error: 'Gemini API key niet geconfigureerd. Voeg GEMINI_API_KEY toe aan je .env.local bestand en herstart de server.' },
         { status: 500 }
       )
     }
 
-    const { message, conversationHistory = [] } = await request.json()
+    // Validate API key format
+    if (!apiKey.startsWith('AIza')) {
+      console.error('Invalid GEMINI_API_KEY format')
+      return NextResponse.json(
+        { error: 'Ongeldige Gemini API key format. Controleer je API key.' },
+        { status: 500 }
+      )
+    }
 
-    if (!message || typeof message !== 'string') {
+    const body = await request.json()
+    const { message, conversationHistory = [] } = body
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return NextResponse.json(
         { error: 'Ongeldig bericht' },
         { status: 400 }
@@ -53,58 +64,87 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize Gemini AI
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-
-    // Build conversation context
-    let conversationContext = SOCRATES_SYSTEM_PROMPT + '\n\nGESPREKSGESCHIEDENIS:\n'
-    
-    // Add conversation history
-    conversationHistory.forEach((msg: any) => {
-      if (msg && msg.role && msg.content) {
-        conversationContext += `${msg.role === 'user' ? 'Student' : 'Socrates'}: ${msg.content}\n`
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024,
       }
     })
+
+    // Build conversation context
+    let prompt = SOCRATES_SYSTEM_PROMPT + '\n\n'
     
-    conversationContext += `Student: ${message}\nSocrates:`
-
-    // Generate response
-    const result = await model.generateContent(conversationContext)
+    // Add conversation history if exists
+    if (conversationHistory.length > 0) {
+      prompt += 'GESPREKGESCHIEDENIS:\n'
+      conversationHistory.forEach((msg: any) => {
+        if (msg && msg.role && msg.content) {
+          const role = msg.role === 'user' ? 'Student' : 'Socrates'
+          prompt += `${role}: ${msg.content}\n`
+        }
+      })
+    }
     
-    if (!result.response) {
-      throw new Error('Geen response ontvangen van Gemini API')
+    prompt += `\nStudent: ${message.trim()}\n\nSocrates:`
+
+    // Generate response with timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+    try {
+      const result = await model.generateContent(prompt)
+      clearTimeout(timeoutId)
+      
+      if (!result.response) {
+        throw new Error('Geen response ontvangen van Gemini API')
+      }
+
+      const responseText = result.response.text()
+
+      if (!responseText || responseText.trim().length === 0) {
+        throw new Error('Lege response ontvangen van Gemini API')
+      }
+
+      return NextResponse.json({ 
+        response: responseText.trim(),
+        success: true 
+      })
+
+    } catch (generateError: any) {
+      clearTimeout(timeoutId)
+      throw generateError
     }
-
-    const response = result.response.text()
-
-    if (!response) {
-      throw new Error('Lege response ontvangen van Gemini API')
-    }
-
-    return NextResponse.json({ 
-      response: response.trim(),
-      success: true 
-    })
 
   } catch (error: any) {
     console.error('Socrates chat error:', error)
     
     // More specific error handling
     let errorMessage = 'Er is een onbekende fout opgetreden bij het gesprek met Socrates'
+    let statusCode = 500
     
     if (error.message?.includes('API key')) {
       errorMessage = 'API key probleem. Controleer je Gemini API key configuratie.'
-    } else if (error.message?.includes('quota')) {
+      statusCode = 401
+    } else if (error.message?.includes('quota') || error.message?.includes('limit')) {
       errorMessage = 'API quota overschreden. Probeer het later opnieuw.'
-    } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
-      errorMessage = 'Netwerkfout. Controleer je internetverbinding.'
+      statusCode = 429
+    } else if (error.message?.includes('network') || error.message?.includes('fetch') || error.name === 'AbortError') {
+      errorMessage = 'Netwerkfout of timeout. Controleer je internetverbinding en probeer opnieuw.'
+      statusCode = 503
+    } else if (error.message?.includes('Invalid API key')) {
+      errorMessage = 'Ongeldige API key. Controleer je Gemini API key.'
+      statusCode = 401
     } else if (error.message) {
       errorMessage = `Fout: ${error.message}`
     }
 
     return NextResponse.json(
       { error: errorMessage },
-      { status: 500 }
+      { status: statusCode }
     )
   }
 }

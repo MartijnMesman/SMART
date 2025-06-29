@@ -23,6 +23,7 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -52,11 +53,15 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
     setMessages(prev => [...prev, userMessage])
     setInputMessage('')
     setIsLoading(true)
+    setError(null)
 
     try {
       const response = await fetch('/api/socrates-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           message: inputMessage.trim(),
           conversationHistory: messages.map(msg => ({
@@ -66,11 +71,15 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
         })
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Netwerkfout')
+        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`)
       }
 
-      const data = await response.json()
+      if (!data.response) {
+        throw new Error('Geen response ontvangen van de server')
+      }
       
       const assistantMessage: Message = {
         role: 'assistant',
@@ -80,11 +89,13 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
 
       setMessages(prev => [...prev, assistantMessage])
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Chat error:', error)
+      setError(error.message || 'Er ging iets mis bij het versturen van je bericht')
+      
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Mijn excuses, er ging iets mis. Kun je je vraag opnieuw stellen?',
+        content: 'Mijn excuses, er ging iets mis. Kun je je vraag opnieuw stellen? Als het probleem aanhoudt, controleer dan of je Gemini API key correct is geconfigureerd.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -109,6 +120,10 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
     if (onInsightGained && userMessages.length > 50) {
       onInsightGained(userMessages)
     }
+  }
+
+  const clearError = () => {
+    setError(null)
   }
 
   if (!isExpanded) {
@@ -165,6 +180,32 @@ export default function SocratesChat({ onInsightGained }: SocratesChatProps) {
             </button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+              <button
+                onClick={clearError}
+                className="text-red-400 hover:text-red-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="h-80 overflow-y-auto p-4 space-y-4">
