@@ -204,14 +204,15 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
               <h3>💡 Waarom deze stap?</h3>
               <p className="text-gray-700">
                 Door je grootste uitdaging bewust te maken, krijg je inzicht in waar je het meest wilt groeien. 
-                Focus op één specifieke uitdaging om diepgaand aan te kunnen werken.
+                Focus op één specifieke uitdaging om diepgaand aan te kunnen werken. Deze stap helpt je situaties 
+                die je lastig vindt beter te leren begrijpen door een grondigere analyse met het 6G-model.
               </p>
             </div>
 
-            {/* Socrates Chat Integration */}
+            {/* Socrates Chat Integration with 6G Model */}
             <SocratesChat 
               stepNumber={1}
-              stepContext="Uitdagingen identificeren"
+              stepContext="6G-model uitdagingen analyseren"
               onInsightGained={(insight) => {
                 // Optionally pre-fill the challenge field with insights from Socrates
                 if (!formData.uitdaging && insight.length > 20) {
@@ -232,7 +233,8 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                 placeholder="Bijvoorbeeld: Ik vind het lastig om mijn tijd goed in te delen tijdens drukke periodes. Ik raak vaak gestrest en verlies het overzicht over mijn taken..."
               />
               <p className="text-sm text-gray-500 mt-2">
-                💡 Tip: Wees zo specifiek mogelijk. Beschrijf niet alleen wat je moeilijk vindt, maar ook wanneer en waarom dit gebeurt.
+                💡 Tip: Wees zo specifiek mogelijk. Beschrijf niet alleen wat je moeilijk vindt, maar ook wanneer en waarom dit gebeurt. 
+                Gebruik het gesprek met Socrates om je uitdaging dieper te analyseren.
               </p>
             </div>
 

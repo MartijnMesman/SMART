@@ -26,7 +26,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   // Step-specific initial messages
   const getInitialMessage = (step: number) => {
     const initialMessages = {
-      1: 'Welkom, jonge student! Ik ben Socrates. Laten we samen ontdekken wat jouw grootste uitdaging is in je studie. Vertel me eens, wat houdt je momenteel het meest bezig in je leerproces?',
+      1: 'Welkom, jonge student! Ik ben Socrates. Laten we samen je grootste uitdaging onderzoeken met behulp van het 6G-model. Dit helpt ons de situatie grondig te begrijpen. Kun je me een specifieke situatie beschrijven waarin je deze uitdaging recent hebt ervaren?',
       2: 'Uitstekend! Nu we je uitdagingen kennen, laten we kijken naar je sterke punten. Vertel me eens over een moment waarop je trots was op jezelf in je studie. Wat deed je toen goed?',
       3: 'Nu gaan we je leerdoel SMART maken. Denk eens na: als je over een paar maanden terugkijkt, wat zou je dan graag bereikt willen hebben? Wees zo specifiek mogelijk.',
       4: 'Laten we je motivatie onderzoeken. Waarom is dit leerdoel belangrijk voor jou? Wat drijft je om hieraan te werken?',
@@ -153,8 +153,8 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   const getStepInfo = (step: number) => {
     const stepInfo = {
       1: { 
-        title: 'Ontdek je uitdagingen', 
-        description: 'Vertel Socrates over situaties waarin je vastloopt of moeite hebt. Hij helpt je de kern van je uitdagingen te begrijpen.' 
+        title: 'Analyseer je uitdaging met het 6G-model', 
+        description: 'Socrates helpt je door gerichte vragen je uitdaging grondig te analyseren: Gebeurtenis, Gevoel, Gedachten, Gedrag, Gevolgen en Gewenst resultaat.' 
       },
       2: { 
         title: 'Herken je kwaliteiten', 
@@ -194,6 +194,29 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
 
   const stepInfo = getStepInfo(stepNumber)
 
+  // 6G Model Progress Tracker for Step 1
+  const get6GProgress = () => {
+    if (stepNumber !== 1) return null
+
+    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
+    
+    const gElements = [
+      { name: 'Gebeurtenis', keywords: ['gebeurde', 'situatie', 'moment', 'toen', 'vooraf'], icon: '📅' },
+      { name: 'Gevoel', keywords: ['voelde', 'emotie', 'gevoel', 'lichaam', 'stress', 'zenuw'], icon: '💭' },
+      { name: 'Gedachten', keywords: ['dacht', 'gedachte', 'hoofd', 'tegen jezelf', 'overtuiging'], icon: '🧠' },
+      { name: 'Gedrag', keywords: ['deed', 'reageerde', 'actie', 'gedrag', 'handelde'], icon: '🎭' },
+      { name: 'Gevolgen', keywords: ['gevolg', 'resultaat', 'daarna', 'effect', 'uitkomst'], icon: '📊' },
+      { name: 'Gewenst', keywords: ['anders', 'liever', 'gewenst', 'volgende keer', 'beter'], icon: '🎯' }
+    ]
+
+    return gElements.map(element => ({
+      ...element,
+      covered: element.keywords.some(keyword => conversationText.includes(keyword))
+    }))
+  }
+
+  const gProgress = get6GProgress()
+
   if (!isExpanded) {
     return (
       <div className="mb-6">
@@ -213,6 +236,40 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
               <p className="text-sm text-blue-600">{stepInfo.description}</p>
             </div>
           </div>
+          
+          {/* 6G Model Preview for Step 1 */}
+          {stepNumber === 1 && (
+            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
+              <h4 className="text-sm font-semibold text-blue-800 mb-2">6G-Model voor situatieanalyse:</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <span>📅</span>
+                  <span className="text-gray-600">Gebeurtenis</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>💭</span>
+                  <span className="text-gray-600">Gevoel</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🧠</span>
+                  <span className="text-gray-600">Gedachten</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🎭</span>
+                  <span className="text-gray-600">Gedrag</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>📊</span>
+                  <span className="text-gray-600">Gevolgen</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>🎯</span>
+                  <span className="text-gray-600">Gewenst</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <p className="text-gray-700 text-sm mb-4">
             {stepInfo.description}
           </p>
@@ -282,6 +339,34 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
               </svg>
             </button>
           </div>
+          
+          {/* 6G Progress Tracker for Step 1 */}
+          {stepNumber === 1 && gProgress && (
+            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">6G-Model voortgang:</span>
+                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                  {gProgress.filter(g => g.covered).length}/6
+                </span>
+              </div>
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                {gProgress.map((g, index) => (
+                  <div
+                    key={index}
+                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
+                      g.covered 
+                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
+                        : 'bg-white bg-opacity-10 text-white opacity-60'
+                    }`}
+                  >
+                    <span className="text-lg mb-1">{g.icon}</span>
+                    <span className="font-medium">{g.name}</span>
+                    {g.covered && <span className="text-green-200 text-xs">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Error Banner */}
@@ -390,6 +475,29 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
               )}
             </button>
           </div>
+          
+          {/* 6G Model Quick Reference for Step 1 */}
+          {stepNumber === 1 && (
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="text-xs text-gray-600 mb-2">
+                <strong>6G-Model hulp:</strong> Vertel over een specifieke situatie waarin je je uitdaging ervaarde
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-1 text-xs">
+                {gProgress?.map((g, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
+                      g.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
+                    }`}
+                  >
+                    <span>{g.icon}</span>
+                    <span>{g.name}</span>
+                    {g.covered && <span className="text-green-500">✓</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           
           {messages.filter(m => m.role === 'user').length > 2 && (
             <div className="mt-3 pt-3 border-t border-gray-100">
