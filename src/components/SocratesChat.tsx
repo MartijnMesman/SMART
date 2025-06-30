@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { aiService } from '@/services/AIService'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -20,6 +21,8 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   const [isLoading, setIsLoading] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fallbackWarning, setFallbackWarning] = useState<string | null>(null)
+  const [aiStatus, setAiStatus] = useState({ primaryAvailable: true, fallbacksAvailable: 0, totalProviders: 0 })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -46,7 +49,15 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
       content: getInitialMessage(stepNumber),
       timestamp: new Date()
     }])
+    
+    // Check AI service status
+    updateAIStatus()
   }, [stepNumber])
+
+  const updateAIStatus = async () => {
+    const status = aiService.getStatus()
+    setAiStatus(status)
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -75,42 +86,39 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
     setInputMessage('')
     setIsLoading(true)
     setError(null)
+    setFallbackWarning(null)
 
     try {
-      const response = await fetch('/api/socrates-chat', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          message: inputMessage.trim(),
-          conversationHistory: messages.map(msg => ({
-            role: msg.role === 'user' ? 'user' : 'assistant',
-            content: msg.content
-          })),
-          stepContext: stepContext,
-          stepNumber: stepNumber
-        })
+      // Use the new AI service with fallback
+      const aiResponse = await aiService.generateResponse(inputMessage.trim(), {
+        conversationHistory: messages.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'assistant',
+          content: msg.content
+        })),
+        stepContext: stepContext,
+        stepNumber: stepNumber
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`)
+      // Show fallback warning if needed
+      if (aiResponse.fallbackUsed && aiResponse.success) {
+        setFallbackWarning(`Gebruikt ${aiResponse.provider} (backup systeem)`)
       }
 
-      if (!data.response) {
-        throw new Error('Geen response ontvangen van de server')
+      // Show error if all providers failed
+      if (!aiResponse.success) {
+        setError(aiResponse.error || 'Alle AI systemen zijn momenteel niet beschikbaar')
       }
       
       const assistantMessage: Message = {
         role: 'assistant',
-        content: data.response,
+        content: aiResponse.response,
         timestamp: new Date()
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      
+      // Update AI status
+      updateAIStatus()
 
     } catch (error: any) {
       console.error('Chat error:', error)
@@ -118,7 +126,7 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
       
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Mijn excuses, er ging iets mis. Kun je je vraag opnieuw stellen? Als het probleem aanhoudt, controleer dan of je Gemini API key correct is geconfigureerd.',
+        content: 'Mijn excuses, er ging iets mis. Kun je je vraag opnieuw stellen? Je kunt ook doorgaan naar de volgende stap.',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, errorMessage])
@@ -147,6 +155,10 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
 
   const clearError = () => {
     setError(null)
+  }
+
+  const clearFallbackWarning = () => {
+    setFallbackWarning(null)
   }
 
   // Step-specific titles and descriptions
@@ -194,204 +206,75 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
 
   const stepInfo = getStepInfo(stepNumber)
 
-  // 6G Model Progress Tracker for Step 1
-  const get6GProgress = () => {
-    if (stepNumber !== 1) return null
-
-    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
-    
-    const gElements = [
-      { name: 'Gebeurtenis', keywords: ['gebeurde', 'situatie', 'moment', 'toen', 'vooraf'], icon: '📅' },
-      { name: 'Gevoel', keywords: ['voelde', 'emotie', 'gevoel', 'boos', 'gefrustreerd', 'verdrietig', 'zenuwachtig', 'stress'], icon: '💭' },
-      { name: 'Gedachten', keywords: ['dacht', 'gedachte', 'hoofd', 'tegen jezelf', 'overtuiging'], icon: '🧠' },
-      { name: 'Gedrag', keywords: ['deed', 'reageerde', 'actie', 'gedrag', 'handelde'], icon: '🎭' },
-      { name: 'Gevolgen', keywords: ['gevolg', 'resultaat', 'daarna', 'effect', 'uitkomst'], icon: '📊' },
-      { name: 'Gewenst', keywords: ['anders', 'liever', 'gewenst', 'volgende keer', 'beter'], icon: '🎯' }
-    ]
-
-    return gElements.map(element => ({
-      ...element,
-      covered: element.keywords.some(keyword => conversationText.includes(keyword))
-    }))
-  }
-
-  // Kernkwadrant Progress Tracker for Step 2
-  const getKernkwadrantProgress = () => {
-    if (stepNumber !== 2) return null
-
-    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
-    
-    const kwadrantElements = [
-      { name: 'Kernkwaliteit', keywords: ['kwaliteit', 'sterk', 'goed', 'talent', 'eigenschap', 'kan'], icon: '💎' },
-      { name: 'Valkuil', keywords: ['doorschiet', 'teveel', 'overdrijf', 'valkuil', 'te veel', 'doorslaat'], icon: '⚠️' },
-      { name: 'Uitdaging', keywords: ['ontwikkelen', 'leren', 'uitdaging', 'balans', 'tegenovergestelde'], icon: '🎯' },
-      { name: 'Allergie', keywords: ['irriteert', 'ergert', 'haat', 'allergie', 'kan niet tegen', 'stoort'], icon: '🚫' }
-    ]
-
-    return kwadrantElements.map(element => ({
-      ...element,
-      covered: element.keywords.some(keyword => conversationText.includes(keyword))
-    }))
-  }
-
-  // SMART Progress Tracker for Step 3
-  const getSMARTProgress = () => {
-    if (stepNumber !== 3) return null
-
-    const conversationText = messages.map(m => m.content.toLowerCase()).join(' ')
-    
-    const smartElements = [
-      { 
-        name: 'Specifiek', 
-        keywords: ['specifiek', 'precies', 'concreet', 'exact', 'duidelijk', 'wat wil je'], 
-        icon: '🎯',
-        description: 'Wat precies?'
-      },
-      { 
-        name: 'Meetbaar', 
-        keywords: ['meten', 'meetbaar', 'cijfer', 'percentage', 'resultaat', 'hoe weet je'], 
-        icon: '📊',
-        description: 'Hoe meet je het?'
-      },
-      { 
-        name: 'Acceptabel', 
-        keywords: ['belangrijk', 'waarom', 'motivatie', 'waarden', 'acceptabel', 'drijft'], 
-        icon: '💝',
-        description: 'Waarom belangrijk?'
-      },
-      { 
-        name: 'Realistisch', 
-        keywords: ['haalbaar', 'realistisch', 'mogelijk', 'middelen', 'kan je', 'uitdagend'], 
-        icon: '⚖️',
-        description: 'Is het haalbaar?'
-      },
-      { 
-        name: 'Tijdgebonden', 
-        keywords: ['wanneer', 'tijdlijn', 'deadline', 'datum', 'periode', 'tijd'], 
-        icon: '⏰',
-        description: 'Wanneer klaar?'
-      }
-    ]
-
-    return smartElements.map(element => ({
-      ...element,
-      covered: element.keywords.some(keyword => conversationText.includes(keyword))
-    }))
-  }
-
-  const gProgress = get6GProgress()
-  const kernkwadrantProgress = getKernkwadrantProgress()
-  const smartProgress = getSMARTProgress()
-
   if (!isExpanded) {
     return (
       <div className="mb-6">
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-3 mb-3">
-            {/* Animated Socrates Avatar - Collapsed State */}
+            {/* AI Status Indicator */}
             <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-xl shadow-lg animate-pulse">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl shadow-lg transition-all duration-300 ${
+                aiStatus.primaryAvailable 
+                  ? 'bg-gradient-to-br from-blue-600 to-purple-600 animate-pulse' 
+                  : aiStatus.fallbacksAvailable > 0
+                  ? 'bg-gradient-to-br from-yellow-500 to-orange-500'
+                  : 'bg-gradient-to-br from-red-500 to-red-600'
+              }`}>
                 🏛️
               </div>
+              
+              {/* Status indicator */}
+              <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                aiStatus.primaryAvailable 
+                  ? 'bg-green-500' 
+                  : aiStatus.fallbacksAvailable > 0
+                  ? 'bg-yellow-500'
+                  : 'bg-red-500'
+              }`}></div>
+              
               {/* Floating wisdom particles */}
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+              {aiStatus.primaryAvailable && (
+                <>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
+                  <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
+                </>
+              )}
             </div>
+            
             <div>
-              <h3 className="font-semibold text-blue-800">Stap {stepNumber}: {stepInfo.title}</h3>
+              <h3 className="font-semibold text-blue-800 flex items-center gap-2">
+                Stap {stepNumber}: {stepInfo.title}
+                {!aiStatus.primaryAvailable && aiStatus.fallbacksAvailable > 0 && (
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                    Backup modus
+                  </span>
+                )}
+                {aiStatus.fallbacksAvailable === 0 && !aiStatus.primaryAvailable && (
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">
+                    Offline modus
+                  </span>
+                )}
+              </h3>
               <p className="text-sm text-blue-600">{stepInfo.description}</p>
             </div>
           </div>
           
-          {/* 6G Model Preview for Step 1 */}
-          {stepNumber === 1 && (
-            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">6G-Model voor situatieanalyse:</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <span>📅</span>
-                  <span className="text-gray-600">Gebeurtenis</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>💭</span>
-                  <span className="text-gray-600">Gevoel</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>🧠</span>
-                  <span className="text-gray-600">Gedachten</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>🎭</span>
-                  <span className="text-gray-600">Gedrag</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>📊</span>
-                  <span className="text-gray-600">Gevolgen</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>🎯</span>
-                  <span className="text-gray-600">Gewenst</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Kernkwadrant Preview for Step 2 */}
-          {stepNumber === 2 && (
-            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">Kernkwadrant van Ofman:</h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <span>💎</span>
-                  <span className="text-gray-600">Kernkwaliteit</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>⚠️</span>
-                  <span className="text-gray-600">Valkuil</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>🎯</span>
-                  <span className="text-gray-600">Uitdaging</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>🚫</span>
-                  <span className="text-gray-600">Allergie</span>
-                </div>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Ontdek je sterke punten, valkuilen en ontwikkelpunten
-              </p>
-            </div>
-          )}
-
-          {/* SMART Preview for Step 3 */}
-          {stepNumber === 3 && (
-            <div className="mb-4 p-3 bg-white rounded-lg border border-blue-100">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">SMART-criteria voor effectieve doelen:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <span>🎯</span>
-                  <span className="text-gray-600"><strong>S</strong>pecifiek - Wat precies?</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>📊</span>
-                  <span className="text-gray-600"><strong>M</strong>eetbaar - Hoe meet je het?</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>💝</span>
-                  <span className="text-gray-600"><strong>A</strong>cceptabel - Waarom belangrijk?</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span>⚖️</span>
-                  <span className="text-gray-600"><strong>R</strong>ealistisch - Is het haalbaar?</span>
-                </div>
-                <div className="flex items-center gap-1 md:col-span-2">
-                  <span>⏰</span>
-                  <span className="text-gray-600"><strong>T</strong>ijdgebonden - Wanneer klaar?</span>
-                </div>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Socrates begeleidt je stap voor stap door elk criterium
+          {/* AI Status Warning */}
+          {!aiStatus.primaryAvailable && (
+            <div className={`mb-4 p-3 rounded-lg border ${
+              aiStatus.fallbacksAvailable > 0 
+                ? 'bg-yellow-50 border-yellow-200' 
+                : 'bg-red-50 border-red-200'
+            }`}>
+              <p className={`text-sm ${
+                aiStatus.fallbacksAvailable > 0 
+                  ? 'text-yellow-700' 
+                  : 'text-red-700'
+              }`}>
+                {aiStatus.fallbacksAvailable > 0 
+                  ? '⚠️ Primaire AI is niet beschikbaar. Backup systeem actief.'
+                  : '🔴 AI systemen zijn niet beschikbaar. Statische vragen beschikbaar.'
+                }
               </p>
             </div>
           )}
@@ -413,11 +296,11 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
   return (
     <div className="mb-6">
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        {/* Header */}
+        {/* Header with AI Status */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* Animated Socrates Avatar - Expanded State */}
+              {/* AI Status Avatar */}
               <div className="relative">
                 <div className={`w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center text-xl transition-all duration-300 ${
                   isLoading ? 'animate-pulse scale-110' : 'hover:scale-105'
@@ -425,20 +308,21 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   🏛️
                 </div>
                 
+                {/* Status indicator */}
+                <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border border-white ${
+                  aiStatus.primaryAvailable 
+                    ? 'bg-green-400' 
+                    : aiStatus.fallbacksAvailable > 0
+                    ? 'bg-yellow-400'
+                    : 'bg-red-400'
+                }`}></div>
+                
                 {/* Thinking animation when loading */}
                 {isLoading && (
                   <>
                     <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-300 rounded-full animate-bounce opacity-80"></div>
                     <div className="absolute -top-3 right-0 w-2 h-2 bg-yellow-200 rounded-full animate-ping" style={{ animationDelay: '0.2s' }}></div>
                     <div className="absolute -top-1 -right-3 w-1 h-1 bg-yellow-100 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                  </>
-                )}
-                
-                {/* Wisdom aura when not loading */}
-                {!isLoading && (
-                  <>
-                    <div className="absolute inset-0 rounded-full bg-white opacity-20 animate-ping" style={{ animationDuration: '3s' }}></div>
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse opacity-60" style={{ animationDelay: '1s' }}></div>
                   </>
                 )}
               </div>
@@ -449,6 +333,11 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   {isLoading && (
                     <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full animate-pulse">
                       denkt na...
+                    </span>
+                  )}
+                  {!aiStatus.primaryAvailable && aiStatus.fallbacksAvailable > 0 && (
+                    <span className="text-xs bg-yellow-400 bg-opacity-20 px-2 py-1 rounded-full">
+                      backup
                     </span>
                   )}
                 </h3>
@@ -465,91 +354,6 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
               </svg>
             </button>
           </div>
-          
-          {/* 6G Progress Tracker for Step 1 */}
-          {stepNumber === 1 && gProgress && (
-            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium">6G-Model voortgang:</span>
-                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                  {gProgress.filter(g => g.covered).length}/6
-                </span>
-              </div>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                {gProgress.map((g, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
-                      g.covered 
-                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
-                        : 'bg-white bg-opacity-10 text-white opacity-60'
-                    }`}
-                  >
-                    <span className="text-lg mb-1">{g.icon}</span>
-                    <span className="font-medium">{g.name}</span>
-                    {g.covered && <span className="text-green-200 text-xs">✓</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Kernkwadrant Progress Tracker for Step 2 */}
-          {stepNumber === 2 && kernkwadrantProgress && (
-            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium">Kernkwadrant voortgang:</span>
-                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                  {kernkwadrantProgress.filter(k => k.covered).length}/4
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {kernkwadrantProgress.map((k, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
-                      k.covered 
-                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
-                        : 'bg-white bg-opacity-10 text-white opacity-60'
-                    }`}
-                  >
-                    <span className="text-lg mb-1">{k.icon}</span>
-                    <span className="font-medium">{k.name}</span>
-                    {k.covered && <span className="text-green-200 text-xs">✓</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* SMART Progress Tracker for Step 3 */}
-          {stepNumber === 3 && smartProgress && (
-            <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium">SMART-criteria voortgang:</span>
-                <span className="text-xs bg-white bg-opacity-20 px-2 py-1 rounded-full">
-                  {smartProgress.filter(s => s.covered).length}/5
-                </span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                {smartProgress.map((s, index) => (
-                  <div
-                    key={index}
-                    className={`flex flex-col items-center p-2 rounded-lg text-xs transition-all duration-300 ${
-                      s.covered 
-                        ? 'bg-green-500 bg-opacity-20 text-green-100' 
-                        : 'bg-white bg-opacity-10 text-white opacity-60'
-                    }`}
-                  >
-                    <span className="text-lg mb-1">{s.icon}</span>
-                    <span className="font-bold">{s.name.charAt(0)}</span>
-                    <span className="font-medium text-center">{s.name}</span>
-                    {s.covered && <span className="text-green-200 text-xs">✓</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Error Banner */}
@@ -578,6 +382,32 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
           </div>
         )}
 
+        {/* Fallback Warning Banner */}
+        {fallbackWarning && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 animate-slideIn">
+            <div className="flex items-center justify-between">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">{fallbackWarning}</p>
+                </div>
+              </div>
+              <button
+                onClick={clearFallbackWarning}
+                className="text-yellow-400 hover:text-yellow-600 transition-colors hover:scale-110"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Messages */}
         <div className="h-80 overflow-y-auto p-4 space-y-4">
           {messages.map((message, index) => (
@@ -597,6 +427,9 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs">🏛️</span>
                     <span className="text-xs font-medium text-blue-600">Socrates</span>
+                    {!aiStatus.primaryAvailable && (
+                      <span className="text-xs bg-yellow-100 text-yellow-600 px-1 rounded">backup</span>
+                    )}
                   </div>
                 )}
                 <p className="text-sm leading-relaxed">{message.content}</p>
@@ -659,177 +492,38 @@ export default function SocratesChat({ onInsightGained, stepContext, stepNumber 
             </button>
           </div>
           
-          {/* 6G Model Quick Reference for Step 1 */}
-          {stepNumber === 1 && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <div className="text-xs text-gray-600 mb-2">
-                <strong>6G-Model hulp:</strong> Vertel over een specifieke situatie waarin je je uitdaging ervaarde
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-1 text-xs">
-                {gProgress?.map((g, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
-                      g.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
-                    }`}
-                  >
-                    <span>{g.icon}</span>
-                    <span>{g.name}</span>
-                    {g.covered && <span className="text-green-500">✓</span>}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Helpful hint for Gevoel specifically */}
-              {stepNumber === 1 && !gProgress?.find(g => g.name === 'Gevoel')?.covered && (
-                <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-xs text-blue-700">
-                    💡 <strong>Tip voor Gevoel:</strong> Beschrijf je emoties zoals boos, gefrustreerd, verdrietig, zenuwachtig, teleurgesteld, etc.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Kernkwadrant Quick Reference for Step 2 */}
-          {stepNumber === 2 && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <div className="text-xs text-gray-600 mb-2">
-                <strong>Kernkwadrant hulp:</strong> Ontdek je sterke punten en ontwikkelpunten
-              </div>
-              <div className="grid grid-cols-2 gap-1 text-xs">
-                {kernkwadrantProgress?.map((k, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
-                      k.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
-                    }`}
-                  >
-                    <span>{k.icon}</span>
-                    <span>{k.name}</span>
-                    {k.covered && <span className="text-green-500">✓</span>}
-                  </div>
-                ))}
+          {/* AI Status Info */}
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  aiStatus.primaryAvailable 
+                    ? 'bg-green-500' 
+                    : aiStatus.fallbacksAvailable > 0
+                    ? 'bg-yellow-500'
+                    : 'bg-red-500'
+                }`}></div>
+                <span>
+                  {aiStatus.primaryAvailable 
+                    ? 'AI volledig operationeel'
+                    : aiStatus.fallbacksAvailable > 0
+                    ? `Backup systeem actief (${aiStatus.fallbacksAvailable} beschikbaar)`
+                    : 'Offline modus - statische vragen'
+                  }
+                </span>
               </div>
               
-              {/* Helpful hints for current focus */}
-              {stepNumber === 2 && kernkwadrantProgress && (
-                <div className="mt-2 space-y-1">
-                  {!kernkwadrantProgress.find(k => k.name === 'Kernkwaliteit')?.covered && (
-                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-700">
-                        💎 <strong>Focus nu op:</strong> Welke sterke eigenschap van jezelf zie je in de uitdagende situatie?
-                      </p>
-                    </div>
-                  )}
-                  {kernkwadrantProgress.find(k => k.name === 'Kernkwaliteit')?.covered && 
-                   !kernkwadrantProgress.find(k => k.name === 'Valkuil')?.covered && (
-                    <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <p className="text-xs text-yellow-700">
-                        ⚠️ <strong>Focus nu op:</strong> Wanneer slaat deze kwaliteit door? Wat gebeurt er als je te veel van het goede doet?
-                      </p>
-                    </div>
-                  )}
-                  {kernkwadrantProgress.find(k => k.name === 'Valkuil')?.covered && 
-                   !kernkwadrantProgress.find(k => k.name === 'Uitdaging')?.covered && (
-                    <div className="p-2 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-xs text-green-700">
-                        🎯 <strong>Focus nu op:</strong> Wat zou je willen ontwikkelen om meer in balans te komen?
-                      </p>
-                    </div>
-                  )}
-                  {kernkwadrantProgress.find(k => k.name === 'Uitdaging')?.covered && 
-                   !kernkwadrantProgress.find(k => k.name === 'Allergie')?.covered && (
-                    <div className="p-2 bg-red-50 rounded-lg border border-red-200">
-                      <p className="text-xs text-red-700">
-                        🚫 <strong>Focus nu op:</strong> Welk gedrag van anderen irriteert je het meest?
-                      </p>
-                    </div>
-                  )}
-                </div>
+              {messages.filter(m => m.role === 'user').length > 2 && (
+                <button
+                  onClick={extractInsights}
+                  className="text-purple-600 hover:text-purple-700 font-medium transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                >
+                  <span className="animate-pulse">💡</span>
+                  Gebruik inzichten
+                </button>
               )}
             </div>
-          )}
-
-          {/* SMART Quick Reference for Step 3 */}
-          {stepNumber === 3 && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <div className="text-xs text-gray-600 mb-2">
-                <strong>SMART-criteria hulp:</strong> Maak je doel specifiek, meetbaar, acceptabel, realistisch en tijdgebonden
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs">
-                {smartProgress?.map((s, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-1 p-1 rounded transition-colors ${
-                      s.covered ? 'text-green-600 bg-green-50' : 'text-gray-500'
-                    }`}
-                  >
-                    <span>{s.icon}</span>
-                    <span><strong>{s.name.charAt(0)}</strong> - {s.description}</span>
-                    {s.covered && <span className="text-green-500">✓</span>}
-                  </div>
-                ))}
-              </div>
-              
-              {/* Helpful hints for current SMART focus */}
-              {stepNumber === 3 && smartProgress && (
-                <div className="mt-2 space-y-1">
-                  {!smartProgress.find(s => s.name === 'Specifiek')?.covered && (
-                    <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-xs text-blue-700">
-                        🎯 <strong>Focus nu op Specifiek:</strong> Wat wil je precies leren of bereiken? Geef een concreet voorbeeld.
-                      </p>
-                    </div>
-                  )}
-                  {smartProgress.find(s => s.name === 'Specifiek')?.covered && 
-                   !smartProgress.find(s => s.name === 'Meetbaar')?.covered && (
-                    <div className="p-2 bg-green-50 rounded-lg border border-green-200">
-                      <p className="text-xs text-green-700">
-                        📊 <strong>Focus nu op Meetbaar:</strong> Hoe ga je meten of je dit bereikt? Wat zou een duidelijk teken van succes zijn?
-                      </p>
-                    </div>
-                  )}
-                  {smartProgress.find(s => s.name === 'Meetbaar')?.covered && 
-                   !smartProgress.find(s => s.name === 'Acceptabel')?.covered && (
-                    <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
-                      <p className="text-xs text-purple-700">
-                        💝 <strong>Focus nu op Acceptabel:</strong> Waarom is dit doel belangrijk voor jou? Wat motiveert je?
-                      </p>
-                    </div>
-                  )}
-                  {smartProgress.find(s => s.name === 'Acceptabel')?.covered && 
-                   !smartProgress.find(s => s.name === 'Realistisch')?.covered && (
-                    <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <p className="text-xs text-yellow-700">
-                        ⚖️ <strong>Focus nu op Realistisch:</strong> Is dit haalbaar voor jou? Welke middelen heb je nodig?
-                      </p>
-                    </div>
-                  )}
-                  {smartProgress.find(s => s.name === 'Realistisch')?.covered && 
-                   !smartProgress.find(s => s.name === 'Tijdgebonden')?.covered && (
-                    <div className="p-2 bg-orange-50 rounded-lg border border-orange-200">
-                      <p className="text-xs text-orange-700">
-                        ⏰ <strong>Focus nu op Tijdgebonden:</strong> Wanneer wil je dit bereikt hebben? Wat is een realistische tijdlijn?
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          
-          {messages.filter(m => m.role === 'user').length > 2 && (
-            <div className="mt-3 pt-3 border-t border-gray-100">
-              <button
-                onClick={extractInsights}
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium transition-all duration-200 hover:scale-105 flex items-center gap-2"
-              >
-                <span className="animate-pulse">💡</span>
-                Gebruik inzichten uit dit gesprek
-              </button>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
