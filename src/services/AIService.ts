@@ -87,7 +87,13 @@ class StaticResponseProvider implements AIProvider {
       "Welk gedrag van anderen irriteert je het meest?"
     ],
     3: [
-      "Wat wil je precies leren of bereiken? Kun je me een concreet voorbeeld geven?",
+      // Verbeterde SPECIFIEK vragen met focus op leren/ontwikkelen
+      "Wat wil je precies kunnen aan het einde van je leertraject?",
+      "Kun je me een heel concreet voorbeeld geven van hoe dit eruit zou zien?",
+      "Wat moet je precies leren om dit te kunnen bereiken?",
+      "Welke vaardigheden ontbreken je nog om dit doel te halen?",
+      "Welke kennis heb je nodig die je nu nog niet hebt?",
+      "In welke drie concrete situaties wil je dit kunnen toepassen?",
       "Hoe ga je meten of je dit bereikt? Wat zou een duidelijk teken van succes zijn?",
       "Waarom is dit doel belangrijk voor jou? Wat motiveert je?",
       "Is dit haalbaar voor jou? Welke middelen heb je nodig?",
@@ -142,8 +148,14 @@ class StaticResponseProvider implements AIProvider {
     // Increment index for next time
     this.responseIndex.set(stepNumber, currentIndex + 1)
     
-    // Add some variation based on user input
-    const variations = [
+    // Add some variation based on user input and step 3 focus
+    const variations = stepNumber === 3 ? [
+      "Dat is een interessante gedachte. Laten we dit concreter maken. ",
+      "Ik begrijp je. Kun je me meer vertellen over wat je precies moet leren? ",
+      "Dank je voor het delen. Laten we dit specifiek maken. ",
+      "Dat klinkt uitdagend. Wat moet je ontwikkelen om dit te bereiken? ",
+      ""
+    ] : [
       "Dat is een interessante gedachte. ",
       "Ik begrijp je. ",
       "Dank je voor het delen. ",
@@ -226,8 +238,13 @@ class OpenAIFallbackProvider implements AIProvider {
     const prompts = {
       1: "Je bent Socrates en helpt studenten hun uitdagingen analyseren met het 6G-model. Stel korte, doordringende vragen.",
       2: "Je bent Socrates en helpt studenten hun kernkwaliteiten ontdekken met het kernkwadrant van Ofman.",
-      3: "Je bent Socrates en helpt studenten SMART leerdoelen formuleren door gerichte vragen te stellen.",
-      // ... meer prompts voor andere stappen
+      3: "Je bent Socrates en helpt studenten SMART leerdoelen formuleren. Bij SPECIFIEK vraag je heel concreet wat ze willen bereiken EN wat ze daarvoor moeten leren of ontwikkelen. Stel gerichte vragen die hen helpen van vaag naar heel specifiek te gaan.",
+      4: "Je bent Socrates en helpt studenten hun motivatie onderzoeken met de BANGE-criteria.",
+      5: "Je bent Socrates en helpt studenten hun startpunt bepalen op een schaal van 0-10.",
+      6: "Je bent Socrates en helpt studenten concrete acties plannen.",
+      7: "Je bent Socrates en helpt studenten obstakels anticiperen.",
+      8: "Je bent Socrates en helpt studenten een planning maken.",
+      9: "Je bent Socrates en helpt studenten reflectie instellen."
     }
     
     return prompts[stepNumber as keyof typeof prompts] || prompts[1]
