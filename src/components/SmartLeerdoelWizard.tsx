@@ -61,10 +61,25 @@ interface FormData {
     cues: string[]
   }
   
-  // Stap 9: Reflectie
+  // Stap 9: Reflectie + SMART Check
   reflectie: {
     evaluatieMoment: string
     succesIndicatoren: string[]
+  }
+  
+  // Nieuw: SMART Final Check
+  smartFinalCheck: {
+    gegenereerdLeerdoel: string
+    smartScore: {
+      specifiek: boolean
+      meetbaar: boolean
+      acceptabel: boolean
+      realistisch: boolean
+      tijdgebonden: boolean
+    }
+    verbeteringen: string[]
+    definitiefLeerdoel: string
+    isGoedgekeurd: boolean
   }
 }
 
@@ -103,6 +118,19 @@ const initialFormData: FormData = {
   reflectie: {
     evaluatieMoment: '',
     succesIndicatoren: []
+  },
+  smartFinalCheck: {
+    gegenereerdLeerdoel: '',
+    smartScore: {
+      specifiek: false,
+      meetbaar: false,
+      acceptabel: false,
+      realistisch: false,
+      tijdgebonden: false
+    },
+    verbeteringen: [],
+    definitiefLeerdoel: '',
+    isGoedgekeurd: false
   }
 }
 
@@ -152,9 +180,63 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
     })
   }
 
+  // SMART Final Check Functions
+  const generateSmartLeerdoel = () => {
+    const specifiek = formData.smartLeerdoel.specifiek || 'mijn vaardigheden verbeteren'
+    const acties = formData.acties.length > 0 ? formData.acties.slice(0, 2).join(' en ') : 'concrete acties ondernemen'
+    const meetbaar = formData.smartLeerdoel.meetbaar || 'meetbare resultaten behalen'
+    const tijdgebonden = formData.smartLeerdoel.tijdgebonden || formData.planning.wanneer || 'binnen een bepaalde periode'
+    const acceptabel = formData.smartLeerdoel.acceptabel || 'dit belangrijk is voor mijn ontwikkeling'
+    const realistisch = formData.smartLeerdoel.realistisch || 'ik de benodigde middelen heb'
+
+    const gegenereerdLeerdoel = `Ik wil ${specifiek} verbeteren/bereiken door ${acties} zodat ik ${meetbaar}. Dit ga ik doen binnen ${tijdgebonden} en meten door ${formData.smartLeerdoel.meetbaar || 'regelmatige evaluatie'}. Dit doel is waardevol omdat ${acceptabel} en realistisch omdat ${realistisch}.`
+
+    return gegenereerdLeerdoel
+  }
+
+  const evaluateSmartCriteria = (leerdoel: string) => {
+    const score = {
+      specifiek: leerdoel.includes('verbeteren') && formData.smartLeerdoel.specifiek.length > 20,
+      meetbaar: leerdoel.includes('meten') && formData.smartLeerdoel.meetbaar.length > 15,
+      acceptabel: leerdoel.includes('waardevol') && formData.smartLeerdoel.acceptabel.length > 15,
+      realistisch: leerdoel.includes('realistisch') && formData.smartLeerdoel.realistisch.length > 15,
+      tijdgebonden: leerdoel.includes('binnen') && formData.smartLeerdoel.tijdgebonden.length > 10
+    }
+
+    const verbeteringen = []
+    if (!score.specifiek) verbeteringen.push('Maak je doel specifieker - wat wil je precies leren of kunnen?')
+    if (!score.meetbaar) verbeteringen.push('Voeg meetbare criteria toe - hoe weet je dat je je doel hebt bereikt?')
+    if (!score.acceptabel) verbeteringen.push('Verduidelijk waarom dit doel belangrijk voor je is')
+    if (!score.realistisch) verbeteringen.push('Leg uit waarom dit doel haalbaar is met je beschikbare middelen')
+    if (!score.tijdgebonden) verbeteringen.push('Stel een duidelijke deadline of tijdsperiode vast')
+
+    return { score, verbeteringen }
+  }
+
+  const runSmartFinalCheck = () => {
+    const gegenereerdLeerdoel = generateSmartLeerdoel()
+    const { score, verbeteringen } = evaluateSmartCriteria(gegenereerdLeerdoel)
+    
+    updateFormData({
+      smartFinalCheck: {
+        ...formData.smartFinalCheck,
+        gegenereerdLeerdoel,
+        smartScore: score,
+        verbeteringen,
+        definitiefLeerdoel: gegenereerdLeerdoel,
+        isGoedgekeurd: Object.values(score).every(Boolean)
+      }
+    })
+  }
+
   const nextStep = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
+      
+      // Auto-run SMART check when entering step 9
+      if (currentStep === 8) {
+        setTimeout(() => runSmartFinalCheck(), 500)
+      }
     }
   }
 
@@ -1005,24 +1087,152 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
         return (
           <div>
             <div className="hero-icon">🔄</div>
-            <h2 className="step-title">Stap 9: Reflectie & vernieuwing</h2>
+            <h2 className="step-title">Stap 9: Reflectie & SMART Final Check</h2>
             
             <div className="info-box green">
               <h3>🎯 Evaluatie voor groei</h3>
               <p className="text-gray-700">
                 Regelmatige reflectie helpt je bij te sturen en je leerdoel aan te passen waar nodig.
+                We controleren ook of je SMART leerdoel goed geformuleerd is.
               </p>
             </div>
 
             {/* Socrates Chat Integration */}
             <SocratesChat 
               stepNumber={9}
-              stepContext="Reflectie instellen"
+              stepContext="Reflectie instellen en SMART check"
               onInsightGained={(insight) => {
                 console.log('Socrates insight for reflection:', insight)
               }}
             />
 
+            {/* SMART Final Check Section */}
+            <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <h3 className="text-xl font-bold text-purple-800 mb-4">🎯 SMART Leerdoel Final Check</h3>
+              
+              <div className="mb-4">
+                <button
+                  onClick={runSmartFinalCheck}
+                  className="btn btn-primary"
+                >
+                  🔍 Controleer mijn SMART leerdoel
+                </button>
+              </div>
+
+              {formData.smartFinalCheck.gegenereerdLeerdoel && (
+                <div className="space-y-4">
+                  {/* Generated SMART Goal */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📝 Jouw geformuleerde SMART leerdoel:</h4>
+                    <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                      <p className="text-blue-800 leading-relaxed">{formData.smartFinalCheck.gegenereerdLeerdoel}</p>
+                    </div>
+                  </div>
+
+                  {/* SMART Criteria Check */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">✅ SMART Criteria Check:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                      {Object.entries(formData.smartFinalCheck.smartScore).map(([criterion, passed]) => (
+                        <div key={criterion} className={`p-3 rounded-lg border ${passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                          <div className="text-center">
+                            <div className={`text-2xl mb-1 ${passed ? 'text-green-600' : 'text-red-600'}`}>
+                              {passed ? '✅' : '❌'}
+                            </div>
+                            <div className="font-medium text-sm uppercase tracking-wide">
+                              {criterion.charAt(0).toUpperCase() + criterion.slice(1)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Improvements Needed */}
+                  {formData.smartFinalCheck.verbeteringen.length > 0 && (
+                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                      <h4 className="font-semibold text-yellow-800 mb-3">⚠️ Verbeterpunten:</h4>
+                      <ul className="space-y-2">
+                        {formData.smartFinalCheck.verbeteringen.map((verbetering, index) => (
+                          <li key={index} className="flex items-start gap-2 text-yellow-700">
+                            <span className="text-yellow-600 mt-1">•</span>
+                            <span>{verbetering}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Final Goal Input */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📝 Pas je leerdoel aan (indien nodig):</h4>
+                    <textarea
+                      className="form-textarea"
+                      rows={4}
+                      value={formData.smartFinalCheck.definitiefLeerdoel}
+                      onChange={(e) => updateFormData({
+                        smartFinalCheck: {
+                          ...formData.smartFinalCheck,
+                          definitiefLeerdoel: e.target.value
+                        }
+                      })}
+                      placeholder="Pas je SMART leerdoel aan totdat het volledig voldoet aan alle criteria..."
+                    />
+                    
+                    <div className="mt-3 flex items-center gap-3">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.smartFinalCheck.isGoedgekeurd}
+                          onChange={(e) => updateFormData({
+                            smartFinalCheck: {
+                              ...formData.smartFinalCheck,
+                              isGoedgekeurd: e.target.checked
+                            }
+                          })}
+                          className="checkbox"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          Ik ben tevreden met de formulering van mijn SMART leerdoel
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* SMART Score Summary */}
+                  <div className={`p-4 rounded-lg border ${
+                    formData.smartFinalCheck.isGoedgekeurd 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-orange-50 border-orange-200'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`text-3xl ${
+                        formData.smartFinalCheck.isGoedgekeurd ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {formData.smartFinalCheck.isGoedgekeurd ? '🎉' : '⚠️'}
+                      </div>
+                      <div>
+                        <h4 className={`font-semibold ${
+                          formData.smartFinalCheck.isGoedgekeurd ? 'text-green-800' : 'text-orange-800'
+                        }`}>
+                          SMART Score: {Object.values(formData.smartFinalCheck.smartScore).filter(Boolean).length}/5
+                        </h4>
+                        <p className={`text-sm ${
+                          formData.smartFinalCheck.isGoedgekeurd ? 'text-green-700' : 'text-orange-700'
+                        }`}>
+                          {formData.smartFinalCheck.isGoedgekeurd 
+                            ? 'Uitstekend! Je SMART leerdoel is goed geformuleerd en klaar voor uitvoering.'
+                            : 'Werk nog aan de verbeterpunten om je leerdoel volledig SMART te maken.'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Regular Reflection Section */}
             <div className="space-y-4">
               <div className="form-group">
                 <label className="form-label">Wanneer ga je je voortgang evalueren?</label>
@@ -1122,7 +1332,7 @@ export default function SmartLeerdoelWizard({ onBack }: SmartLeerdoelWizardProps
                   <strong>SMART compleet:</strong> {generateSummary().smartComplete ? '✅ Ja' : '⚠️ Nog niet volledig'}
                 </div>
                 <div className="bg-white p-3 rounded border">
-                  <strong>Aantal acties:</strong> {generateSummary().totalActions}
+                  <strong>SMART Final Check:</strong> {formData.smartFinalCheck.isGoedgekeurd ? '✅ Goedgekeurd' : '⚠️ Nog aanpassen'}
                 </div>
                 <div className="bg-white p-3 rounded border">
                   <strong>Planning gemaakt:</strong> {generateSummary().hasPlan ? '✅ Ja' : '⚠️ Nog niet volledig'}
