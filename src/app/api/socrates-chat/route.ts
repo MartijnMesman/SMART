@@ -25,21 +25,21 @@ const getStepSpecificPrompt = (stepNumber: number, stepContext?: string) => {
 
          VOLG DEZE STAPPEN SYSTEMATISCH:
 
-         1. KERNKWALITEIT IDENTIFICEREN:
-         - "Welke sterke eigenschap van jezelf herken je in deze situatie?"
+         1. UITDAGING IDENTIFICEREN (waar jij mee geconfronteerd werd in de uitdagende situatie):
+         - "Wat zou je willen ontwikkelen om meer in balans te komen?"
+         - "Welk gedrag zou je hiervoor moeten laten zien?"
+         - "Wat is het tegenovergestelde van je kernkwaliteit?"
+         
+         2. KERNKWALITEIT IDENTIFICEREN:
+         - "Welke sterke eigenschap van jezelf staat tegenover de uitdaging die je ervaart?"
          - "Hoe uit zich dat concreet in je gedrag?"
          - "Kun je me een voorbeeld geven van wanneer deze kwaliteit je goed van pas kwam?"
          
-         2. VALKUIL ONDERZOEKEN (teveel van het goede):
+         3. VALKUIL ONDERZOEKEN (teveel van het goede):
          - "Wanneer slaat deze kwaliteit door?"
          - "Wat gebeurt er als je hierin doorschiet?"
          - "Welk effect heeft dit op anderen?"
          - "Herken je momenten waarop je te veel van deze kwaliteit liet zien?"
-         
-         3. UITDAGING IDENTIFICEREN (het positieve tegenovergestelde van de valkuil):
-         - "Wat zou je willen ontwikkelen om meer in balans te komen?"
-         - "Welk gedrag zou je hiervoor moeten laten zien?"
-         - "Wat is het tegenovergestelde van je valkuil?"
          
          4. ALLERGIE VERKENNEN (teveel van de uitdaging):
          - "Welk gedrag van anderen irriteert je het meest?"
@@ -57,24 +57,11 @@ const getStepSpecificPrompt = (stepNumber: number, stepContext?: string) => {
          VOLG DEZE SMART-VOLGORDE SYSTEMATISCH:
 
          1. SPECIFIEK (S) - Maak het doel heel concreet en helder:
-         
-         EERSTE FASE - WAT WIL JE BEREIKEN:
          - "Wat wil je precies kunnen aan het einde van je leertraject?"
+         - "Wat moet je precies leren of ontwikkelen om dit te kunnen bereiken?"
          - "In welke concrete situatie wil je dit kunnen toepassen?"
          - "Wat zou iemand anders zien als je dit doel hebt bereikt?"
          - "Kun je me een heel specifiek voorbeeld geven van hoe dit eruit zou zien?"
-         
-         TWEEDE FASE - WAT MOET JE DAARVOOR LEREN/ONTWIKKELEN:
-         - "Wat moet je precies leren om dit te kunnen bereiken?"
-         - "Welke vaardigheden ontbreken je nog om dit doel te halen?"
-         - "Welke kennis heb je nodig die je nu nog niet hebt?"
-         - "Welke gedragingen moet je ontwikkelen of veranderen?"
-         - "Wat is het verschil tussen waar je nu staat en waar je wilt zijn?"
-         
-         DERDE FASE - CONCRETE VOORBEELDEN:
-         - "Kun je me drie concrete voorbeelden geven van situaties waarin je dit wilt kunnen?"
-         - "Hoe zou je dit precies aanpakken in [specifieke situatie]?"
-         - "Wat zou je anders doen dan nu?"
 
          2. MEETBAAR (M) - Hoe ga je vooruitgang meten:
          - "Hoe ga je meten of je vooruitgang boekt?"
@@ -83,18 +70,18 @@ const getStepSpecificPrompt = (stepNumber: number, stepContext?: string) => {
          - "Hoe weet je dat je halverwege bent?"
          - "Welke feedback ga je verzamelen om je voortgang te meten?"
 
-         3. ACCEPTABEL (A) - Waarom is dit belangrijk:
+         3. ACCEPTABEL (A) - Waarom is dit belangrijk voor jou en je omgeving:
          - "Waarom is dit doel belangrijk voor jou persoonlijk?"
-         - "Hoe past dit bij je waarden en ambities?"
+         - "Waarom is het belangrijk voor anderen dat jij aan dit doel werkt?"
          - "Wat motiveert je om hier energie in te steken?"
          - "Hoe draagt dit bij aan je bredere ontwikkeling?"
 
          4. REALISTISCH (R) - Is het haalbaar en uitdagend:
-         - "Is dit doel haalbaar voor jou in je huidige situatie?"
+         - "In hoeverre is dit leerdoel te makkelijk voor jou in je huidige situatie?"
+         - "Is het uitdagend genoeg om je te motiveren?"
          - "Welke middelen en ondersteuning heb je nodig?"
          - "Wat maakt je ervan overtuigd dat je dit kunt bereiken?"
-         - "Is het uitdagend genoeg om je te motiveren?"
-
+         
          5. TIJDGEBONDEN (T) - Wanneer wil je dit bereiken:
          - "Wanneer wil je dit doel bereikt hebben?"
          - "Welke tussenstappen kun je plannen?"
@@ -119,7 +106,6 @@ const getStepSpecificPrompt = (stepNumber: number, stepContext?: string) => {
          Start: "Wat wil je precies kunnen aan het einde van je leertraject?"
          → Doorvragen: "Kun je me een heel concreet voorbeeld geven?"
          → Dieper: "Wat moet je precies leren om dit te kunnen bereiken?"
-         → Nog specifieker: "Welke vaardigheden ontbreken je nog?"
          → Concrete situaties: "In welke drie situaties wil je dit kunnen toepassen?"
          → Pas dan naar M: "Mooi! Hoe ga je meten of je dit bereikt?"
 
